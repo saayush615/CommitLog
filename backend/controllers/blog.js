@@ -1,36 +1,80 @@
-const Blog = require('../models/blog');
+import Blog from '../models/blog';
 
 async function handleCreateBlog(req,res) {
     try{
-        const { Title, Description } = req.body;
-        const CreatedBy = req.user.id;
-        const blog = await Blog.create({ Title, Description, CreatedBy, Tumbnail: req.file ? req.file.path : null }); // Save the file path
-        return res.redirect('/');
+        const { title, description } = req.body;
+        const createdBy = req.user.id;
+
+        if (!title || !description) {
+            return res.status(400).json({
+                success: false,
+                error: 'Title and Description are required'
+            })
+        }
+        const blog = await Blog.create({
+             title, 
+             description, 
+             createdBy, 
+             tumbnail: req.file ? req.file.path : null // Save the file path
+            }); 
+        return res.status(201).json({
+            success: true,
+            message: 'Post created successfully',
+            blog
+        });
     } catch (err){
-        return res.render('home', { error: err.message, user: req.user });
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
     }
 }
 
 async function handleReadBlog(req,res)  {
     try{
-        const blogs = await Blog.find().populate('CreatedBy', 'Name'); // Only populate the Name field
-        return res.status(200).json({message: 'Blogs fetched successfully', blogs});
+        const blogs = await Blog.find().populate('createdBy', 'name'); // Only populate the Name field
+        return res.status(200).json({
+            success: true,
+            message: 'Blogs fetched successfully', 
+            blogs
+        });
 
     } catch (err){
-        return res.status(500).json({error: err.message});
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
     }
 }
 
 async function handleReadBlogById(req,res)  {
     try{
         const id = req.params.id;
-        if(!id) return res.status(400).json({error: 'Blog id is required'});
-        const blog = await Blog.findById(id).populate('CreatedBy', 'Name'); // Only populate the Name field
-        if(!blog) return res.status(404).json({error: 'Blog not found'});
-        return res.status(200).json({message: 'Blog fetched successfully', blog});
+        if(!id){ 
+            return res.status(400).json({
+                success: false,
+                error: 'Blog id is required'
+            });
+        }
+        const blog = await Blog.findById(id).populate('createdBy', 'name'); // Only populate the Name field
+        if(!blog){
+            return res.status(404).json({
+                success: false,
+                error: 'Blog not found'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Blog fetched successfully', 
+            blog
+        });
 
     } catch (err){
-        return res.status(500).json({error: err.message});
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
     }
 }
 
@@ -38,30 +82,38 @@ async function handleReadBlogById(req,res)  {
 async function handleUpdateBlog(req, res) {
     try {
         const id = req.params.id;
-        const { Title, Description } = req.body;
-
+        const { title, description } = req.body;
         
         // Prepare update data
-        const updateData = { Title, Description };
-        if (req.file) {
-            updateData.Tumbnail = req.file.path;
-        }
+        const updateData = {};
+        if (title) updateData.title = title;
+        if (description) updateData.description = description;
+        if (req.file) updateData.thumbnail = req.file.path;
 
         // Update blog
         const blog = await Blog.findByIdAndUpdate(
             id, 
             updateData,
             { new: true }
-        ).populate('CreatedBy', 'Name');
+        ).populate('createdBy', 'name');
 
         if (!blog) {
-            return res.status(404).json({ error: 'Blog not found' });
+            return res.status(404).json({
+                success: false, 
+                error: 'Blog not found'
+            });
         }
 
-        return res.redirect('/myBlogs');
+        return res.status(200).json({
+            success: true,
+            message: 'Blog updated',
+            blog
+        });
     } catch (err) {
-        console.error('Update error:', err);
-        return res.status(500).json({ error: err.message });
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });;
     }
 }
 
@@ -70,15 +122,31 @@ async function handleDeleteBlog(req,res)  {
     try{
         const id = req.params.id;
 
-        const blog = await Blog.findByIdAndDelete(id).populate('CreatedBy', 'Name');
-        return res.redirect('/myBlogs');
+        const blog = await Blog.findById(id);
+
+        if (!blog) {
+            return res.status(404).json({
+                success: false,
+                error: 'Blog not found'
+            });
+        }
+
+        await Blog.findByIdAndDelete(id);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Blog deleted successfully',
+        });
 
     } catch (err){
-        return res.status(500).json({error: err.message});
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
     }
 }
 
-module.exports = {
+export {
     handleCreateBlog,
     handleReadBlog,
     handleReadBlogById,

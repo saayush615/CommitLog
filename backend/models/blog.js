@@ -1,23 +1,23 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const blogSchema = new mongoose.Schema({
-    Title: {
+    title: {
         type: String,
         required: true,
     },
-    Description: {
+    description: {
         type: String,
         required: true,
     },
-    CreatedBy: {
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
         required: true,
     },
-    Tumbnail: {
+    tumbnail: {
         type: String, // Store the file path or URL of the uploaded image
         required: false, // Optional field        
     }
 },{timestamps: true});
 
-module.exports = mongoose.model('blog', blogSchema);
+export default mongoose.model('blog', blogSchema);

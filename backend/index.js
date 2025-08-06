@@ -1,17 +1,14 @@
-const express = require('express');
-const Path = require('path');
-const mongooose = require('mongoose');
-const dotenv = require('dotenv');
-const cookieParser = require('cookie-parser');
-const methodOverride = require('method-override');
+import express from 'express';
+import Path from 'path';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+import methodOverride from 'method-override';
 
-const { checkAuth } = require('./middlewares/auth');
-const {upload} = require('./services/upload');
+import { checkAuth } from './middlewares/auth.js';
 
-const static = require('./routes/staticRoute');
-const userRoute = require('./routes/user');
-const blogRoute = require('./routes/blog');
-
+import userRoute from './routes/user.js';
+import blogRoute from './routes/blog.js';
 
 const app = express();
 
@@ -28,7 +25,7 @@ app.use('/uploads', express.static(Path.join(__dirname, 'uploads')));
 
 // Connect to DB
 async function connectDB(){
-    await mongooose.connect(process.env.BlogifyDB);
+    await mongoose.connect(process.env.CommitLogDB);
     console.log('✅ Connected to DB');
 };
 connectDB().catch((err) => { 
@@ -36,13 +33,15 @@ connectDB().catch((err) => {
     process.exit(1);
 });
 
-app.set('view engine', 'ejs');
-app.set('views', Path.join(__dirname, 'views'));
+app.get('/',(req,res) => { 
+    return res.status(200).json({
+        success: true,
+        message: 'Welcome to blog backend'
+    })
+ })
 
-app.use('/', static);
 app.use('/user', userRoute);
 app.use('/blog', blogRoute);
-
 
 const port = process.env.PORT || 3000;
 app.listen(port,() => { 

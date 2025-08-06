@@ -1,32 +1,66 @@
-const USER = require('../models/user');
-const { hashPassword, comparePassword } = require('../services/hash');
-const { generateToken, verifyToken } = require('../services/auth');
+import USER from '../models/user';
+import { hashPassword, comparePassword } from '../services/hash';
+import { generateToken } from '../services/auth';
 
 async function handleSignup(req, res){
-    const { Name, Email, Password} = req.body;
+    const { name, email, password} = req.body;
+    if(!name || !email || !password){
+        return res.status(400).json({
+            success: false,
+            error: 'All fields are required'
+        })
+    }
     try{
-        const hashedPassword = await hashPassword(Password);
-        const user = await USER.create({ Name, Email, Password: hashedPassword });
-        return res.redirect('/login');
+        const hashedPassword = await hashPassword(password);
+        const user = await USER.create({ name, email, password: hashedPassword });
+        return res.status(201).json({
+            success: true,
+            message: 'Signedup succesfully. Procced to login'
+        });
 
     } catch(err){
-        return res.render('signup', { error: 'An error occurred. Please try again.' });
+        return res.status(500).json({
+            success: false,
+            error: 'Internal Server error' // we donot directly send the raw error to client
+        });
     }
 }
 
 async function handleLogin(req,res){
-    const { Email, Password } = req.body; 
-    const user = await USER.findOne({ Email });
-    if(!user){
-        return res.render('login', { error: 'Invalid Email' });
+    const { email, password } = req.body; 
+    if (!email || !password) {
+        return res.status(400).json({
+            success: false,
+            error: 'All fields are required'
+        })
     }
-    const isMatch = await comparePassword(Password, user.Password);
-    if(!isMatch){
-        return res.render('login', { error: 'Invalid Password' });
+    try {
+        const user = await USER.findOne({ email });
+        if(!user){
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid Email'
+            });
+        }
+        const isMatch = await comparePassword(password, user.password);
+        if(!isMatch){
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid Password'
+            });
+        }
+        const token = generateToken(user);
+        res.cookie("uid", token);
+        return res.status(200).json({
+            sucess: true,
+            message: 'Login succesfully'
+        })
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        })
     }
-    const token = generateToken(user);
-    res.cookie("uid", token);
-    return res.redirect('/');
 }
 
-module.exports = { handleSignup, handleLogin };
+export { handleSignup, handleLogin };

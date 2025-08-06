@@ -1,11 +1,11 @@
-const dotenv = require('dotenv');
-dotenv.config();
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 
-const jwt = require('jsonwebtoken');
+dotenv.config();
 const secret = process.env.secret;
 
 function generateToken(user) {
-    return jwt.sign({ id: user._id, Email: user.Email}, secret);
+    return jwt.sign({ id: user._id, email: user.email}, secret);
 }
 
 function verifyToken(token) {
@@ -17,4 +17,4 @@ function verifyToken(token) {
     }
 }
 
-module.exports = { generateToken, verifyToken };
+export { generateToken, verifyToken };
