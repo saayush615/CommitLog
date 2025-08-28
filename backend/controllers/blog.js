@@ -1,4 +1,4 @@
-import Blog from '../models/blog';
+import Blog from '../models/blog.js';
 
 async function handleCreateBlog(req,res) {
     try{

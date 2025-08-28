@@ -3,9 +3,9 @@ import Path from 'path';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import methodOverride from 'method-override';
+// import methodOverride from 'method-override';
 
-import { checkAuth } from './middlewares/auth.js';
+// import { checkAuth } from './middlewares/auth.js';
 
 import userRoute from './routes/user.js';
 import blogRoute from './routes/blog.js';
@@ -17,11 +17,11 @@ dotenv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(checkAuth); // Middleware to check authentication
-app.use(methodOverride('_method')); // Use method-override to support DELETE and PUT methods
+// app.use(checkAuth); // Middleware to check authentication
+// app.use(methodOverride('_method')); // Use method-override to support DELETE and PUT methods
 
 // Serve static files from the "uploads" directory
-app.use('/uploads', express.static(Path.join(__dirname, 'uploads')));
+// app.use('/uploads', express.static(Path.join(__dirname, 'uploads')));
 
 // Connect to DB
 async function connectDB(){

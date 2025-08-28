@@ -2,10 +2,18 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 
 dotenv.config();
-const secret = process.env.secret;
+const secret = process.env.JWT_SECRET;
 
 function generateToken(user) {
-    return jwt.sign({ id: user._id, email: user.email}, secret);
+    return jwt.sign(
+        { 
+        id: user._id, 
+        username: user.username, 
+        email: user.email
+        }, 
+        secret,
+        { expiresIn: '24h' }
+    );
 }
 
 function verifyToken(token) {
