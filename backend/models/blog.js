@@ -5,18 +5,14 @@ const blogSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    description: {
+    content: {
         type: String,
         required: true,
     },
-    createdBy: {
+    author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
         required: true,
-    },
-    tumbnail: {
-        type: String, // Store the file path or URL of the uploaded image
-        required: false, // Optional field        
     }
 },{timestamps: true});
 
