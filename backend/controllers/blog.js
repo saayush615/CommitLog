@@ -2,7 +2,6 @@ import Blog from '../models/blog.js';
 
 async function handleCreateBlog(req,res) {
     const { title, content } = req.body;
-
     const author = req.user.id;
 
     if (!title || !content) {
@@ -13,18 +12,29 @@ async function handleCreateBlog(req,res) {
     }
 
     try{
-        const blog = await Blog.create({
-             title, 
+        const blog = await Blog.create({ // Returns a Document Instance -> Every data will be available like blog._id, blog.title 
+             title,                      // but can't be populated, It is not query obj(doesnot have query method).   
              content, 
-             author
-            //  tumbnail: req.file ? req.file.path : null // Save the file path
+             author,
+             coverImage: req.file ? req.file.path : null // Save the file path
             }); 
+
+        // Populate author info and return
+        const populatedBlog = await Blog.findById(blog._id).populate('author', 'username firstname lastname');
+
         return res.status(201).json({
             success: true,
             message: 'Post created successfully',
-            blog
+            populatedBlog
         });
     } catch (err){
+        // Clean up uploaded file if database operation fails
+        if (req.file) {
+            fs.unlink(req.file.path, (unlinkErr) => {
+                if (unlinkErr) console.error('Error deleting file:', unlinkErr);
+            });
+        }
+
         console.error('Create blog error:', err); // debugging
         return res.status(500).json({
             success: false,
@@ -89,19 +99,43 @@ async function handleUpdateBlog(req, res) {
     try {
         const id = req.params.id;
         const { title, content } = req.body;
+
+        const blog = req.blog;
         
         const updateData = {};
         if(title) updateData.title = title;
         if(content) updateData.content = content;
 
-        const blog = await Blog.findByIdAndUpdate(id, updateData);
+        if(req.file){
+            updateData.coverImage = req.file.path;
+
+            // Delete old cover image if it exists
+            if(blog.coverImage && fs.existsSync(blog.coverImage)){
+                fs.unlink(blog.coverImage, (unlinkErr) => {
+                if (unlinkErr) console.error('Error deleting coverImage:', unlinkErr);
+            });
+            }
+        }
+
+        const newBlog = await Blog.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { new: true } // Returns the NEW document (after the update)
+        ).populate('author', 'username firstname lastname');
 
         return res.status(200).json({
             success: true,
-            message: 'Data is successfully updated'
+            message: 'Data is successfully updated',
+            newBlog
         })
         
     } catch (err) {
+        if(req.file){
+            fs.unlink(req.file.path, (unlinkErr) => { 
+                if(unlinkErr) console.error('Error deleting the file:', unlinkErr);
+             })
+        }
+
         console.error('Error in handleUpdateBlog:', err); // debugging
         return res.status(500).json({
             success: false,
@@ -114,6 +148,14 @@ async function handleUpdateBlog(req, res) {
 async function handleDeleteBlog(req,res)  {
     try{
         const id = req.params.id;
+        const existingblog = req.blog;
+
+        // Delete cover image file if it exists
+        if(existingblog.coverImage && fs.existsSync(existingblog.coverImage)){
+            fs.unlink(existingblog.coverImage, (handleErr) => { 
+                if(handleErr) console.error('Error in deleting cover-Image:', handleErr);
+             })
+        }
 
         const blog = await Blog.findByIdAndDelete(id);
 

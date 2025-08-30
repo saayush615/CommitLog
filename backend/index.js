@@ -3,9 +3,9 @@ import Path from 'path';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-// import methodOverride from 'method-override';
 
 import { checkAuth } from './middlewares/auth.js';
+import { globalErrorHandler } from './middlewares/errorHandler.js';
 
 import userRoute from './routes/user.js';
 import blogRoute from './routes/blog.js';
@@ -14,14 +14,16 @@ const app = express();
 
 dotenv.config();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+// 2 buildin and 1 third party middleware
+app.use(express.json());  // they are body-parsers. convert incomming json data in js object.  and attaches it to the request object as "req.body"
+app.use(express.urlencoded({ extended: true })); // convert "form" data in js object format. keep it clean. make available inside "req.body" object
+app.use(cookieParser()); // reads this raw Cookie header string
+                        // parses it into a regular JavaScript object, attaches this object to the request object as "req.cookies"
+
 app.use(checkAuth); // Middleware to check authentication
-// app.use(methodOverride('_method')); // Use method-override to support DELETE and PUT methods
 
 // Serve static files from the "uploads" directory
-// app.use('/uploads', express.static(Path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(Path.join(__dirname, 'uploads')));
 
 // Connect to DB
 async function connectDB(){
@@ -42,6 +44,9 @@ app.get('/',(req,res) => {
 
 app.use('/user', userRoute);
 app.use('/blog', blogRoute);
+
+// Global error handler (must be last middleware)
+app.use(globalErrorHandler)
 
 const port = process.env.PORT || 3000;
 app.listen(port,() => { 

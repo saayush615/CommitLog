@@ -13,6 +13,10 @@ const blogSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
         required: true,
+    },
+    coverImage: {
+        type: String,
+        default: null // optional field for cover image path
     }
 },{timestamps: true});
 
