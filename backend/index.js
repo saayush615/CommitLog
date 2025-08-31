@@ -2,6 +2,7 @@ import express from 'express';
 import Path from 'path';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 
 import { checkAuth } from './middlewares/auth.js';
@@ -13,6 +14,10 @@ import blogRoute from './routes/blog.js';
 const app = express();
 
 dotenv.config();
+
+//  __dirname doesn't exist in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = Path.dirname(__filename);
 
 // 2 buildin and 1 third party middleware
 app.use(express.json());  // they are body-parsers. convert incomming json data in js object.  and attaches it to the request object as "req.body"
@@ -44,6 +49,14 @@ app.get('/',(req,res) => {
 
 app.use('/user', userRoute);
 app.use('/blog', blogRoute);
+
+// Add route not found error before Global error
+app.use('*', (req,res) => { 
+    res.status(404).json({
+        success: false,
+        error: 'Route not found'
+    });
+ });
 
 // Global error handler (must be last middleware)
 app.use(globalErrorHandler)
