@@ -1,5 +1,6 @@
 import { verifyToken } from '../services/auth.js';
 import Blog from '../models/blog.js'
+import { createUnauthorizedError, createForbiddenError, createNotFoundError } from '../utils/errorFactory.js'
 
 async function checkAuth(req, res, next) {
     const userUid = req.cookies?.uid;
@@ -16,10 +17,7 @@ async function checkAuth(req, res, next) {
 //Authentication is required
 async function requireAuth(req,res,next) {
     if (!req.user) {
-        return res.status(401).json({
-            success: false,
-            error: 'Authentication required'
-        });
+        return next(createUnauthorizedError())
     }
     next();
 }
@@ -30,28 +28,18 @@ async function requireAuthor(req,res,next) {
         const blogId = req.params.id;
         const blog = await Blog.findById(blogId);
         if(!blog){
-            return res.status(404).json({
-                success: false,
-                error: 'Blog not found'
-            })
+            return next(createNotFoundError('Blog'))
         }
 
         if(blog.author.toString() !== req.user.id){
-            return res.status(403).json({
-                success: false,
-                error: 'You can only modify your own posts'
-            })
+            return next(createForbiddenError('You can only modify your own posts.'))
         }
 
         // Attach the blog 
         req.blog = blog;
         next();
     } catch (error) {
-        console.error('Author Authorization error:', err); // debugging
-        return res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        })
+        next(error);
     }
 }
 

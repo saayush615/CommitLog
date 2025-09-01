@@ -36,7 +36,7 @@ async function connectDB(){
     console.log('✅ Connected to DB');
 };
 connectDB().catch((err) => { 
-    console.log('❌ Error connecting to DB', err);
+    next(err);
     process.exit(1);
 });
 
