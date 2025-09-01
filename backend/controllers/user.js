@@ -1,45 +1,35 @@
 import USER from '../models/user.js';
 import { hashPassword, comparePassword } from '../services/hash.js';
 import { generateToken } from '../services/auth.js';
+import AppError from '../utils/AppError.js';
+import { createValidationError, createNotFoundError, createDuplicateError, createUnauthorizedError } from '../utils/errorFactory.js';
 
-async function handleSignup(req, res){
+async function handleSignup(req, res, next){
     const { firstname, lastname , username, email, password} = req.body;
 
     // 1. synchronous validations
 
     // Validate required fields
     if(!firstname || !lastname || !username || !email || !password){
-        return res.status(400).json({
-            success: false,
-            error: 'All fields are required'
-        })
+        return next(createValidationError('All fields are required!'));
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if(!emailRegex.test(email)){
-        return res.status(400).json({
-            success: false,
-            error: 'Please provide a valid email address'
-        })
+        return next(createValidationError('Please provide a valid email address'));
     }
 
     // Password minimun 6 character.
     if(password.length < 6) {
-        return res.status(400).json({
-            success: false,
-            error: 'Password must be at least 6 characters long'
-        });
+        return next(createValidationError('Password must be at least 6 characters long'));
     }
 
     try{
         // Check if user already exists (2. asynchronous validations)
         const existingUser = await USER.findOne({ $or: [{email},{username}]});
         if(existingUser){
-            return res.status(400).json({
-                success: false,
-                error: 'User with this email or username already exists'
-            })
+            return next(createDuplicateError('User with this email or username'));
         };
         const hashedPassword = await hashPassword(password);
         await USER.create({ 
@@ -56,23 +46,15 @@ async function handleSignup(req, res){
         });
 
     } catch(err){
-        console.error('Signup error:', err); // for debugging
-
-        return res.status(500).json({
-            success: false,
-            error: 'Internal Server error' // we donot directly send the raw error to client
-        });
+        next(err);
     }
 }
 
-async function handleLogin(req,res){
+async function handleLogin(req,res, next){
     const { usernameOrEmail, password } = req.body; 
 
     if (!usernameOrEmail || !password) {
-        return res.status(400).json({
-            success: false,
-            error: 'Username/email and password are required'
-        })
+        return next(createValidationError('Username/email and password are required'));
     };
 
     try {
@@ -84,17 +66,11 @@ async function handleLogin(req,res){
             ]
         });
         if(!user){
-            return res.status(401).json({ // 401 = authentication failure
-                success: false,
-                error: 'Invalid credentials'
-            });
+            return next(createUnauthorizedError('Invalid credentials'));
         }
         const isMatch = await comparePassword(password, user.password);
         if(!isMatch){
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid credentials'
-            });
+            return next(createUnauthorizedError('Invalid credentials'));
         }
         const token = generateToken(user);
 
@@ -117,13 +93,7 @@ async function handleLogin(req,res){
             }
         })
     } catch (err) {
-        // for debugging
-        console.error('Login error:',err);
-
-        return res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        })
+        next(err);
     }
 }
 

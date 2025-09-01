@@ -1,14 +1,13 @@
 import Blog from '../models/blog.js';
+import fs from 'fs';
+import { createValidationError, createNotFoundError } from '../utils/errorFactory.js';
 
-async function handleCreateBlog(req,res) {
+async function handleCreateBlog(req,res, next) {
     const { title, content } = req.body;
     const author = req.user.id;
 
     if (!title || !content) {
-        return res.status(400).json({
-            success: false,
-            error: 'Title and Content are required'
-        })
+        return next(createValidationError('Title and content are required!'));
     }
 
     try{
@@ -25,7 +24,7 @@ async function handleCreateBlog(req,res) {
         return res.status(201).json({
             success: true,
             message: 'Post created successfully',
-            populatedBlog
+            blog: populatedBlog
         });
     } catch (err){
         // Clean up uploaded file if database operation fails
@@ -35,15 +34,12 @@ async function handleCreateBlog(req,res) {
             });
         }
 
-        console.error('Create blog error:', err); // debugging
-        return res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });
+        // ✅ Use next(err) for database errors - let global handler decide
+        next(err); // Pass error to global handler
     }
 }
 
-async function handleReadBlog(req,res)  {
+async function handleReadBlog(req,res, next)  {
     try{
         const blogs = await Blog.find().populate('author', 'username'); // Only populate the username field
         return res.status(200).json({
@@ -53,30 +49,21 @@ async function handleReadBlog(req,res)  {
         });
 
     } catch (err){
-        console.error('handle blog error:', err); // debugging
-        return res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });
+        // ✅ Use next(err) for database errors
+        next(err); // pass error to gobal handler
     }
 }
 
-async function handleReadBlogById(req,res)  {
+async function handleReadBlogById(req,res, next)  {
     const id = req.params.id;
     if(!id){ 
-        return res.status(400).json({
-            success: false,
-            error: 'Blog id is required'
-        });
+        return next(createValidationError('Blog id is required'));
     }
 
     try{
         const blog = await Blog.findById(id).populate('author', 'firstname lastname username');
         if(!blog){
-            return res.status(404).json({
-                success: false,
-                error: 'Blog not found'
-            });
+            return next(createNotFoundError('Blog'));
         }
 
         return res.status(200).json({
@@ -86,16 +73,13 @@ async function handleReadBlogById(req,res)  {
         });
 
     } catch (err){
-        console.error('handle by id blog error:', err); // debugging
-        return res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });
+        // ✅ Use next(err) for unexpected database errors (invalid ObjectId format, etc.)
+        next(err);
     }
 }
 
 
-async function handleUpdateBlog(req, res) {
+async function handleUpdateBlog(req, res, next) {
     try {
         const id = req.params.id;
         const { title, content } = req.body;
@@ -117,7 +101,7 @@ async function handleUpdateBlog(req, res) {
             }
         }
 
-        const newBlog = await Blog.findByIdAndUpdate(
+        const updatedBlog = await Blog.findByIdAndUpdate(
             id, 
             updateData, 
             { new: true } // Returns the NEW document (after the update)
@@ -126,7 +110,7 @@ async function handleUpdateBlog(req, res) {
         return res.status(200).json({
             success: true,
             message: 'Data is successfully updated',
-            newBlog
+            blog: updatedBlog
         })
         
     } catch (err) {
@@ -136,16 +120,12 @@ async function handleUpdateBlog(req, res) {
              })
         }
 
-        console.error('Error in handleUpdateBlog:', err); // debugging
-        return res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });;
+        next(err);
     }
 }
 
 
-async function handleDeleteBlog(req,res)  {
+async function handleDeleteBlog(req,res,next)  {
     try{
         const id = req.params.id;
         const existingblog = req.blog;
@@ -166,11 +146,7 @@ async function handleDeleteBlog(req,res)  {
         });
 
     } catch (err){
-        console.error('Error in handleDeleteBlog:', err);
-        return res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });
+        next(err);
     }
 }
 
