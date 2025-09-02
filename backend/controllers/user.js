@@ -1,8 +1,7 @@
 import USER from '../models/user.js';
 import { hashPassword, comparePassword } from '../services/hash.js';
 import { generateToken } from '../services/auth.js';
-import AppError from '../utils/AppError.js';
-import { createValidationError, createNotFoundError, createDuplicateError, createUnauthorizedError } from '../utils/errorFactory.js';
+import { createValidationError, createDuplicateError, createUnauthorizedError } from '../utils/errorFactory.js';
 
 async function handleSignup(req, res, next){
     const { firstname, lastname , username, email, password} = req.body;
