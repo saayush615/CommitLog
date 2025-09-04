@@ -19,12 +19,18 @@ const blogSchema = new mongoose.Schema({
         default: null // optional field for cover image path
     },
     // likes
+    likes: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     likesCount: {
-        type: Number,
-        default: 0
-    },
-    // shares
-    sharesCount: {
         type: Number,
         default: 0
     },
@@ -53,6 +59,7 @@ const blogSchema = new mongoose.Schema({
 },{timestamps: true});
 
 // Add indexes for better performance
+blogSchema.index({ 'likes.user': 1});
 blogSchema.index({ 'comments.user': 1});
 blogSchema.index({ commentsCount: -1});
 blogSchema.index({ likesCount: -1});

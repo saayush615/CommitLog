@@ -1,6 +1,6 @@
 import Blog from '../models/blog.js';
 import fs from 'fs';
-import { createValidationError, createNotFoundError } from '../utils/errorFactory.js';
+import { createValidationError, createNotFoundError, createForbiddenError } from '../utils/errorFactory.js';
 
 async function handleCreateBlog(req,res, next) {
     const { title, content } = req.body;
@@ -152,7 +152,172 @@ async function handleDeleteBlog(req,res,next)  {
 
 // Like / Unlike a blog
 async function handleToggleLike(req, res, next) {
+    try {
+        const blogId = req.params.id;
+        const userId = req.user.id;
+
+        const blog = await Blog.findById(blogId);
+        if(!blog) {
+            return next(createNotFoundError('Blog'));
+        }
+
+        // check if user has already liked this blog
+        const existingLikeIndex = blog.likes.findIndex(like => like.user.toString() === userId);
+
+        let message;
+        let isLiked;
+
+        if(existingLikeIndex > -1) {
+            // User has already liked, so unlike it
+            blog.likes.splice(existingLikeIndex, 1);
+            blog.likesCount = Math.max(0, blog.likesCount - 1);
+            message = 'Blog unliked successfully';
+            isLiked = false;
+        } else {
+            // User hasn't liked, so like it
+            blog.likes.push({ user: userId });
+            blog.likesCount += 1;
+            message = 'Blog liked successfully';
+            isLiked = true;
+        }
+
+        await blog.save();
+
+        return res.status(200).json({
+            success: true,
+            message: message,
+            data: {
+                blogId: blog._id,
+                likesCount: blog.likesCount,
+                isLiked
+            }
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function handleShareBlog(req,res,next) {
+    // handle it later
+}
+
+async function handleAddComment(req,res,next) {
+    try {
+        const blogId = req.params.id;
+        const userId = req.user.id;
+        const { content } = req.body;
+
+        if(!content || content.trim() === '') {
+            return next(createValidationError('Comment content is required'));
+        }
+
+        const blog = await Blog.findById(blogId);
+        if(!blog) {
+            return next(createNotFoundError('Blog'));
+        }
+
+        const newComment = {
+            user: userId,
+            content: content.trim(),
+            createdAt: new Date()
+        };
+
+        blog.comments.push(newComment);
+        blog.commentsCount += 1;
+
+        await blog.save();
+
+        // populate the newly added comment with user info
+        const populateBlog = await Blog.findById(blogId)
+            .populate('comments.user', 'username firstname lastname')
+            .select('comments');
+
+        const addComment = populatedBlog.comments[populateBlog.comments.length - 1];
+
+        return res.status(201).json({
+            success: true,
+            message: 'Comment added succesfully',
+            data: {
+                comment: addedComment,
+                commentsCount: blog.commentsCount
+            }
+        });
+
     
+    } catch (error) {
+        next(error)
+    }
+}
+
+// Delete comment
+async function handleDeleteComment(req, res, next) {
+    try{
+        const blogId = req.params.id;
+        const commentId = req.params.commentId;
+        const userId = req.user.id;
+
+        const blog = await Blog.findById(blogId);
+        if(!blog){
+            return next(createNotFoundError('Blog'));
+        }
+
+        // Find the comment
+        const commentIndex = blog.comments.findIndex(
+            comment => comment._id.toString() === commentId
+        );
+
+        // Find the comment
+        if(commentIndex === -1) {
+            return next(createNotFoundError('Comment'));
+        }
+
+        const comment = blog.comment[commentIndex];
+
+        if(comment.user.toString() !== userId && blog.author.toString() !== userId) {
+            return next(createForbiddenError('You can only delete your own comment or comment on your blog'));
+        }
+
+        // Remove comment
+        blog.comments.splice(commentIndex, 1);
+        blog.commentsCount = Math.max(0, blog.commentsCount - 1);
+
+        await blog.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Comment deleted successfully',
+            data: {
+                commentsCount: blog.commentsCount
+            }
+        });
+    } catch(err) {
+        next(err);
+    }
+}
+
+// Stats for blog
+async function handleGetBlogStats(req,res,next) {
+    try {
+        const blogId = req.params.id;
+
+        const blog = await Blog.findById(blogId);
+        if (!blog) {
+            return next(createNotFoundError('Blog'));
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Blog statistics fetched succesfully',
+            stats: {
+                blogId: blog._id,
+                likesCount: blog.likesCount,
+                sharesCount: blog.sharesCount,
+                commentsCount: blog.commentsCount
+            }
+        })
+    } catch (error) {
+        next(error);
+    }
 }
 
 export {
