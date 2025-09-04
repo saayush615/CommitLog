@@ -11,7 +11,7 @@ const blogSchema = new mongoose.Schema({
     },
     author: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
+        ref: 'User',
         required: true,
     },
     coverImage: {
@@ -19,33 +19,11 @@ const blogSchema = new mongoose.Schema({
         default: null // optional field for cover image path
     },
     // likes
-    likes: [{
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'user',
-            required: true
-        },
-        createdAt: {
-            type: Date,
-            default: Date.now 
-        }
-    }],
     likesCount: {
         type: Number,
         default: 0
     },
     // shares
-    shares: [{
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'user',
-            required: true
-        },
-        sharedAt: {
-            type: Date,
-            default: Date.now
-        }
-    }],
     sharesCount: {
         type: Number,
         default: 0
@@ -54,7 +32,7 @@ const blogSchema = new mongoose.Schema({
     comments: [{
         user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'user',
+            ref: 'User',
             required: true
         },
         content: {
@@ -75,12 +53,9 @@ const blogSchema = new mongoose.Schema({
 },{timestamps: true});
 
 // Add indexes for better performance
-blogSchema.index({ 'likes.user': 1});
-blogSchema.index({ 'shares.user': 1});
 blogSchema.index({ 'comments.user': 1});
-blogSchema.index({ likesCount: -1})
-blogSchema.index({ sharesCount: -1})
-blogSchema.index({ commentsCount: -1})
+blogSchema.index({ commentsCount: -1});
+blogSchema.index({ likesCount: -1});
 
 
-export default mongoose.model('blog', blogSchema);
+export default mongoose.model('Blog', blogSchema);

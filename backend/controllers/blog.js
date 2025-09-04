@@ -150,6 +150,11 @@ async function handleDeleteBlog(req,res,next)  {
     }
 }
 
+// Like / Unlike a blog
+async function handleToggleLike(req, res, next) {
+    
+}
+
 export {
     handleCreateBlog,
     handleReadBlog,
