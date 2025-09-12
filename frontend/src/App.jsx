@@ -18,6 +18,8 @@ function App() {
           <p className='text-white font-sans text-lg'>Latest</p>
         </div>
         <Card />
+        <Card />
+        <Card />
       </div>
     </>
   )
