@@ -1,7 +1,9 @@
 import React from 'react'
+// Icons
 import Logo from '../assets/CommitLog-Logo.png'
-import { Button } from './ui/button.tsx'
 import { CirclePlus } from 'lucide-react';
+// link
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
@@ -14,9 +16,12 @@ const Navbar = () => {
         </div>
 
         {/* buttons */}
+        
         <div className='my-auto m-3 sm:mr-5 md:mr-7 lg:mr-10 cursor-pointer'>
-          <CirclePlus size={30} color='white' strokeWidth={3} className='mx-auto' />
-          <p className='text-white size-sx'>create</p>
+          <Link to="/CreateBlog">
+            <CirclePlus size={30} color='white' strokeWidth={3} className='mx-auto' />
+            <p className='text-white size-sx hidden md:block'>create</p>
+          </Link>
         </div>
       </div>
     </nav>
