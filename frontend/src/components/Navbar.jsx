@@ -2,6 +2,8 @@ import React from 'react'
 // Icons
 import Logo from '../assets/CommitLog-Logo.png'
 import { CirclePlus } from 'lucide-react';
+// ui-compoentn
+import { Button } from "@/components/ui/button"
 // link
 import { Link } from 'react-router-dom';
 
@@ -14,6 +16,15 @@ const Navbar = () => {
         <div className='mx-auto'>
           <img src={Logo} alt="CommitLog-Logo" className='w-50 my-5' />
         </div>
+
+        {/* Signup and login Button */}
+        <Link to="/signup">
+          <Button variant="secondary">Sign-up</Button>
+        </Link>
+
+        <Link to="/login">
+          <Button variant="secondary">Login</Button>
+        </Link>
 
         {/* buttons */}
         
