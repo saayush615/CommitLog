@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import axios from 'axios'
 // Layout
 import AuthLayout from '../components/AuthLayout'
@@ -16,6 +16,7 @@ const Login = () => {
     const {
       register,
       handleSubmit,
+      reset,
       formState: { errors },
     } = useForm();
   

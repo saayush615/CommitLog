@@ -2,6 +2,7 @@ import express from 'express';
 import Path from 'path';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 
@@ -18,6 +19,11 @@ dotenv.config();
 //  __dirname doesn't exist in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
+
+app.use(cors({
+    origin: 'http://localhost:5173', // Your frontend URL
+    credentials: true    // Allow cookies to be sent/received
+}))
 
 // 2 buildin and 1 third party middleware
 app.use(express.json());  // they are body-parsers. convert incomming json data in js object.  and attaches it to the request object as "req.body"

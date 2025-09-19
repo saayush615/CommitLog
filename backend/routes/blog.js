@@ -8,17 +8,17 @@ const router = express.Router();
 // Public routes (no auth needed)
 router.get('/read', handleReadBlog);
 router.get('/read/:id', handleReadBlogById);
-router.get('/:id/stats', handleGetBlogStats);
+// router.get('/:id/stats', handleGetBlogStats);
 
 // Protected routes (auth required)
 router.post('/create', requireAuth, upload.single('coverImage'), handleCreateBlog);
-router.get('read-with-interaction/:id', requireAuth, handleReadBlogWithInteractions);
+// router.get('read-with-interaction/:id', requireAuth, handleReadBlogWithInteractions);
 
 // Interaction route (auth required)
-router.post('/:id/like', requireAuth, handleToggleLike);
-router.post('/:id/share', requireAuth, handleShareBlog);
-router.post('/:id/comment', requireAuth, handleAddComment);
-router.delete('/:id/comment/:commentId', requireAuth, handleDeleteComment);
+// router.post('/:id/like', requireAuth, handleToggleLike);
+// router.post('/:id/share', requireAuth, handleShareBlog);
+// router.post('/:id/comment', requireAuth, handleAddComment);
+// router.delete('/:id/comment/:commentId', requireAuth, handleDeleteComment);
 
 // Author-only routes (auth + ownership required)
 router.put('/update/:id', requireAuth, requireAuthor, upload.single('coverImage'), handleUpdateBlog);

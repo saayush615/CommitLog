@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import axios from 'axios'
 // Layout
 import AuthLayout from '../components/AuthLayout'
@@ -11,22 +11,64 @@ import { useForm } from 'react-hook-form'
 import { motion, scale } from "motion/react"
 
 const Signup = () => {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const {
     register,
     handleSubmit,
+    reset, // It clears the form (or sets it to specific values), removing any user input and validation errors.
+    watch, // observe the value of form fields in real-time, returns the current value of a field
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => console.log(data);
+  const password = watch("password", ""); //  second argument "" is the default value if nothing is entered yet
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      // Remove confirmPassword from data before sending to API
+      const { confirmPassword, ...submitData } = data;
+
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/user/`,submitData);
+      console.log(response); // debugging purpose
+      setSuccessMsg("Account created successfully! You can now login.");
+      reset();  // After a successful signup, reset() clears all the fields so the form is empty again.
+    } catch (error) {
+      if (error.response) {
+        setErrorMsg(error.response.data.message || "Signup failed.")
+      } else {
+        setErrorMsg("Network error. Please try again.")
+      }
+      console.error("Signup error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   return (
     <div>
       <AuthLayout title='Sign-up'>
         <div className='flex flex-col w-full'>
+
+          {/* Success/Error Messages */}
+          {successMsg && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+              {successMsg}
+            </div>
+          )}
+          {errorMsg && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {errorMsg}
+            </div>
+          )}
+  
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} action="">
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
             {/* firstname */}
             <input type="text" 
             placeholder='Enter your first name' 
@@ -99,10 +141,26 @@ const Signup = () => {
               <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
             )}
 
-            <motion.button type='submit' 
+            {/* Confirm password */}
+            <input type="password" 
+            placeholder='Confirm your password' 
+            {...register("confirmPassword",{
+              required: {value: true, message: "Please confirm your password"},
+              validate: value => value === password || "Passwords do not match"
+            })} 
+            className='border-2 border-neon text-white m-2 p-4 w-3/4 h-10' 
+            />
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
+            )}
+
+            <motion.button 
+            type='submit' 
+            disabled={loading}
             className='text-black font-sans bg-white hover:bg-gray-300 p-3 m-2 rounded-xl cursor-pointer w-24 h-10 flex items-center justify-center'
-            whileTap={{ scale:0.95 }}
-            >Submit
+            whileTap={!loading ? { scale:0.95 } : {}}
+            >
+              {loading ? 'Creating...' : 'Sign Up'}
             </motion.button>
           </form>
 
