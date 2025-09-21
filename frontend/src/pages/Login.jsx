@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import axios from 'axios'
+// useNavigate
+import { useNavigate } from 'react-router-dom' // useNAvigation = programatic navigation
 // Layout
 import AuthLayout from '../components/AuthLayout'
 // Icons
@@ -12,6 +14,10 @@ import { motion, scale } from "motion/react"
 
 
 const Login = () => {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const navigate = useNavigate();
 
     const {
       register,
@@ -20,14 +26,50 @@ const Login = () => {
       formState: { errors },
     } = useForm();
   
-    const onSubmit = (data) => console.log(data);
+    const onSubmit = async (data) => {
+      setLoading(true);
+      setErrorMsg('');
+      setSuccessMsg('');
+
+      try {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`,data, {
+          withCredentials: true  // This is crucial for receiving cookies
+        });
+        console.log(response); //debugging
+        setSuccessMsg("Login Successfully!");
+        reset();
+
+        // Programatic navigation after sucessfull login
+        setTimeout(() => { 
+          navigate('/'); // Navigate to homepage
+         }, 1000);
+
+      } catch (error) {
+        if (error.response) {
+          setErrorMsg(error.response.data.message || "Signup failed.")
+        } else {
+          setErrorMsg("Network error. Please try again.")
+        }
+        console.error("Login error: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <div>
       <AuthLayout title='Login'>
         <div className='flex flex-col w-full'>
+
+          {/* Error Message */}
+          {errorMsg && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {errorMsg}
+            </div>
+          )}
+
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} action="">
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
             {/* username or email */}
             <input type="text" 
@@ -53,10 +95,13 @@ const Login = () => {
               <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
             )}
 
-            <motion.button type='submit' 
+            <motion.button 
+            type='submit' 
+            disabled={loading}
             className='text-black font-sans bg-white hover:bg-gray-300 p-3 m-2 rounded-xl cursor-pointer w-24 h-10 flex items-center justify-center'
-            whileTap={{ scale:0.95 }}
-            >Submit
+            whileTap={!loading ? { scale:0.95 } : {}}
+            >
+              {loading ? 'loading...' : 'Login'}
             </motion.button>
           </form>
 
