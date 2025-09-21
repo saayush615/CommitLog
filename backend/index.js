@@ -5,12 +5,18 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
+import session from 'express-session';
+
+// Import passport configuration
+import './config/passport.js';
+import passport from 'passport';
 
 import { checkAuth } from './middlewares/auth.js';
 import { globalErrorHandler } from './middlewares/errorHandler.js';
 
 import userRoute from './routes/user.js';
 import blogRoute from './routes/blog.js';
+import authRoute from './routes/auth.js';
 
 const app = express();
 
@@ -21,9 +27,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
 app.use(cors({
-    origin: 'http://localhost:5173', // Your frontend URL
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Your frontend URL
     credentials: true    // Allow cookies to be sent/received
 }))
+
+// Session middleware (required for passport, even if we use JWT)
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+// Initialize Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 // 2 buildin and 1 third party middleware
 app.use(express.json());  // they are body-parsers. convert incomming json data in js object.  and attaches it to the request object as "req.body"
@@ -55,6 +76,7 @@ app.get('/',(req,res) => {
 
 app.use('/user', userRoute);
 app.use('/blog', blogRoute);
+app.use('/auth', authRoute);
 
 // Add route not found error before Global error
 app.use('*', (req,res) => { 

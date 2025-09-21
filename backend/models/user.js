@@ -21,7 +21,28 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: function() {
+            return !this.googleId && !this.githubId;
+        }
+    },
+    googleId: {  // Stores unique Google user identifier
+        type: String,
+        unique: true,
+        sparse: true // Allow the null value but ensures uniqueness when present
+    },
+    githubId: {  // Stores unique Github user identifier
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    authProvider: { // Tracks how user registered
+        type: String,
+        enum: ['local','google', 'github'],
+        default: 'local'
+    },
+    profilePicture: {
+        type: String,
+        default: null
     }
 }, {timestamps: true});
 

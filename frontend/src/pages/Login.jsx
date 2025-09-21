@@ -56,6 +56,11 @@ const Login = () => {
       }
     };
 
+    // Add Google OAuth handler
+    const handleGoogleAuth = () => {
+      window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+    };
+
   return (
     <div>
       <AuthLayout title='Login'>
@@ -110,6 +115,7 @@ const Login = () => {
             <p>or</p>
             {/* Google */}
             <motion.div 
+            onClick={handleGoogleAuth}
             className='bg-white hover:bg-gray-300 text-black font-sans cursor-pointer m-3 p-4 rounded-2xl flex justify-center items-center gap-1 w-3/4 h-14 md:1/2'
             whileTap={{ scale:0.95 }}
             >
