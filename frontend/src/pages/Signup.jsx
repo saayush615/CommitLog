@@ -4,7 +4,8 @@ import axios from 'axios'
 import AuthLayout from '../components/AuthLayout'
 // Icons
 import Google from '../assets/google.svg'
-import FB from '../assets/fb.svg'
+import Github from '../assets/github-mark.svg'
+
 // React-hook-form
 import { useForm } from 'react-hook-form'
 // Motion
@@ -52,6 +53,11 @@ const Signup = () => {
   // Add Google OAuth handler
   const handleGoogleAuth = () => {
     window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+  };
+
+  // Add GitHub OAuth handler
+  const handleGitHubAuth = () => {
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/github`;
   };
 
 
@@ -181,13 +187,14 @@ const Signup = () => {
               <img src={Google} alt="Google" className='h-8 md:h-12' />
               <p>Continue with google</p>
             </motion.div>
-            {/* Fb */}
+            {/* github */}
             <motion.div 
+            onClick={handleGitHubAuth}
             className='bg-white hover:bg-gray-300 text-black font-sans cursor-pointer m-3 p-4 rounded-2xl flex justify-center items-center gap-1 w-3/4 h-14 md:1/2'
             whileTap={{ scale:0.95 }}
             >
-              <img src={FB} alt="FB" className='h-8 md:h-12' />
-              <p>Continue with facebook</p>
+              <img src={Github} alt="FB" className='h-6 md:h-10' />
+              <p>Continue with Github</p>
             </motion.div>
           </div>
         </div>

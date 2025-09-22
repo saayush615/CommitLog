@@ -11,19 +11,27 @@ function App() {
   const [searchParams] = useSearchParams();
   
   useEffect(() => {
-    // Handle OAuth success/error from URL parameters
     const authStatus = searchParams.get('auth');
     const error = searchParams.get('error');
     
-    if (authStatus === 'success') {
-      // Show success message or redirect
-      console.log('OAuth authentication successful!');
-      // You could show a toast notification here
+    if (authStatus === 'google_success') {
+      console.log('Google OAuth authentication successful!');
+      // Show success toast or notification
+    }
+    
+    if (authStatus === 'github_success') {
+      console.log('GitHub OAuth authentication successful!');
+      // Show success toast or notification
     }
     
     if (error) {
       console.error('OAuth error:', error);
-      // Show error message to user
+      // Show error message based on error type
+      if (error.includes('google')) {
+        console.error('Google OAuth failed');
+      } else if (error.includes('github')) {
+        console.error('GitHub OAuth failed');
+      }
     }
   }, [searchParams]);
 

@@ -5,10 +5,10 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
-import session from 'express-session';
 
 // Import passport configuration
-import './config/passport.js';
+import './config/passport.js';  // 1. Execute the file without importing anything
+                                // 2. Configures Passport globally
 import passport from 'passport';
 
 import { checkAuth } from './middlewares/auth.js';
@@ -31,20 +31,9 @@ app.use(cors({
     credentials: true    // Allow cookies to be sent/received
 }))
 
-// Session middleware (required for passport, even if we use JWT)
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
-}));
 
 // Initialize Passport middleware
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.initialize());  // Sets up Passport in your Express app
 
 // 2 buildin and 1 third party middleware
 app.use(express.json());  // they are body-parsers. convert incomming json data in js object.  and attaches it to the request object as "req.body"

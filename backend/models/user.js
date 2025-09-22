@@ -21,8 +21,8 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: function() {
-            return !this.googleId && !this.githubId;
+        required: function() {  // In arrow functions (() => {}), this does not refer to the current object, so always use regular functions (function() {}) when you need this in Mongoose schemas.
+            return !this.googleId && !this.githubId; // this = USER schema
         }
     },
     googleId: {  // Stores unique Google user identifier
