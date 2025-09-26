@@ -35,7 +35,7 @@ const Login = () => {
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`,data, {
           withCredentials: true  // This is crucial for receiving cookies
         });
-        console.log(response); //debugging
+        // console.log(response); //debugging
         setSuccessMsg("Login Successfully!");
         reset();
 
@@ -119,23 +119,25 @@ const Login = () => {
           <div className=' border-t-2 border-white border-dotted flex flex-col items-center'>
             <p>or</p>
             {/* Google */}
-            <motion.div 
+            <motion.button 
+            disabled={loading}
             onClick={handleGoogleAuth}
             className='bg-white hover:bg-gray-300 text-black font-sans cursor-pointer m-3 p-4 rounded-2xl flex justify-center items-center gap-1 w-3/4 h-14 md:1/2'
             whileTap={{ scale:0.95 }}
             >
               <img src={Google} alt="Google" className='h-8 md:h-12' />
               <p>Continue with google</p>
-            </motion.div>
+            </motion.button>
             {/* github */}
-            <motion.div 
+            <motion.button 
+            disabled={loading}
             onClick={handleGitHubAuth}
             className='bg-white hover:bg-gray-300 text-black font-sans cursor-pointer m-3 p-4 rounded-2xl flex justify-center items-center gap-1 w-3/4 h-14 md:1/2'
             whileTap={{ scale:0.95 }}
             >
               <img src={Github} alt="FB" className='h-8 md:h-12' />
               <p>Continue with Github</p>
-            </motion.div>
+            </motion.button>
           </div>
         </div>
       </AuthLayout>

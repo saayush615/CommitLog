@@ -5,9 +5,14 @@ import { CirclePlus } from 'lucide-react';
 // ui-compoentn
 import { Button } from "@/components/ui/button"
 // link
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+// Import useAuth custom hook
+import { useAuth } from '../hooks/useAuth';
 
 const Navbar = () => {
+  const { isAuthenticated, isLoading, user, logout } = useAuth();
+  const navigate = useNavigate();
+
   return (
     // mx-auto only works if the element has a width or max-width set. Otherwise, it won't appear centered.
     <nav>
@@ -17,23 +22,42 @@ const Navbar = () => {
           <img src={Logo} alt="CommitLog-Logo" className='w-50 my-5' />
         </div>
 
-        {/* Signup and login Button */}
-        <Link to="/signup">
-          <Button variant="secondary">Sign-up</Button>
-        </Link>
+        {!isAuthenticated ? (
+          // Show login/signup buttons for non-authenticated users
+          <>
+            <Button 
+              variant="secondary" 
+              onClick={() => navigate('/signup')}
 
-        <Link to="/login">
-          <Button variant="secondary">Login</Button>
-        </Link>
+              // onClick={doSomething()} = "Do this NOW while rendering" ❌
+              // Note: Functions without parameters - Can use direct reference
+              // onClick={() => doSomething()} = "When clicked, THEN do this" ✅
 
-        {/* buttons */}
-        
-        <div className='my-auto m-3 sm:mr-5 md:mr-7 lg:mr-10 cursor-pointer'>
-          <Link to="/CreateBlog">
-            <CirclePlus size={30} color='white' strokeWidth={3} className='mx-auto' />
-            <p className='text-white size-sx hidden md:block'>create</p>
-          </Link>
-        </div>
+            >
+              Sign-up
+            </Button>
+            
+            <Button 
+              variant="secondary" 
+              onClick={() => navigate('/login')}
+            >
+              Login
+            </Button>
+            
+          </>
+        ) : (
+          // Show user menu and create button for authenticated users
+          <>
+
+            {/* Create blog button */}
+            <div className='my-auto m-3 sm:mr-5 md:mr-7 lg:mr-10 cursor-pointer'>
+              <Link to="/CreateBlog">
+                <CirclePlus size={30} color='white' strokeWidth={3} className='mx-auto' />
+                <p className='text-white size-sx hidden md:block'>create</p>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </nav>
   )

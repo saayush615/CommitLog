@@ -14,7 +14,7 @@ passport.use(new GoogleStrategy({
   },
   async (accessToken, refreshToken, profile, done) => {   // If you ever need to use this inside the callback (for example, to access strategy options), use the regular function. Otherwise, arrow functions are fine.
     try {
-        console.log('Google profile:', profile);  //Debugging
+        // console.log('Google profile:', profile);  //Debugging
 
         // 1. Check if user alredy exist with this GoogleId
         let user = await USER.findOne({ googleId: profile.id });
@@ -65,7 +65,7 @@ passport.use(new GitHubStrategy({
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-        console.log('Github profile:', profile); //debugging
+        // console.log('Github profile:', profile); //debugging
 
         // 1. check if Github.id alreay exists
         let user = await USER.findOne({ githubId: profile.id });
@@ -103,7 +103,7 @@ passport.use(new GitHubStrategy({
 
         done(null, user);
     } catch (error){
-        console.log('Github Auth error:', error);
+        // console.log('Github Auth error:', error);
         return done(error,null);
     }
   }

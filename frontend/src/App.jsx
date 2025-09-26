@@ -8,11 +8,12 @@ import Signup from './pages/Signup'
 import Login from './pages/Login'
 
 function App() {
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();  //  lets you read and update the query string parameters in the URL
   
   useEffect(() => {
-    const authStatus = searchParams.get('auth');
-    const error = searchParams.get('error');
+    // suppose url is http://localhost:3000/?auth=google_success&error=none
+    const authStatus = searchParams.get('auth'); // google_success 
+    const error = searchParams.get('error'); // none
     
     if (authStatus === 'google_success') {
       console.log('Google OAuth authentication successful!');

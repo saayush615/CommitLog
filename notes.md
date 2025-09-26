@@ -4,9 +4,11 @@
 
 ### **1. Authentication & Authorization**
 
-#### **JWT vs Sessions Comparison**
+#### **JWT(Stateless) vs Sessions Comparison(statefull)**
 ```javascript
 // JWT Implementation (Stateless)
+import jwt from 'jsonwebtoken';
+
 const token = jwt.sign(
     { id: user._id, username: user.username, email: user.email }, 
     secret,

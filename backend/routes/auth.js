@@ -1,6 +1,8 @@
 import express from 'express';
 import passport from '../config/passport.js';
 import { generateToken } from '../services/auth.js';
+import { createValidationError, createDuplicateError, createUnauthorizedError } from '../utils/errorFactory.js';
+
 
 const router = express.Router();
 
@@ -35,7 +37,7 @@ router.get('/google/callback',
             });
 
             // Redirect to frontend with success
-            res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/?auth=success`);
+            res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/?auth=google_success`);
         } catch (error) {
             console.error('OAuth callback error:', error);
             res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=callback_failed`);
@@ -82,5 +84,32 @@ router.get('/logout', (req, res) => {
     res.clearCookie('uid');
     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`);
 });
+
+
+router.get('/me', async (req,res) => {
+    try {
+        // req.user is set by checkAuth middleware if user is authenticated
+        if (req.user) {
+            return res.status(200).json({
+                success: true,
+                user: {
+                    id: req.user.id,
+                    username: req.user.username,
+                    email: req.user.email
+                }
+            });
+        } else {
+            return res.status(401).json({
+                success: false,
+                message: 'Not authenticated'
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+})
 
 export default router;

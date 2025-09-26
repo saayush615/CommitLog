@@ -96,4 +96,24 @@ async function handleLogin(req,res, next){
     }
 }
 
+// async function handleAuthStatus(req,res,next) {
+//     try {
+//         if (req.user) {
+//             return res.status(200).json({
+//                 success: true,
+//                 message: 'authenticated',
+//                 user: {
+//                     id: req.user.id,
+//                     username: req.user.username,
+//                     email: req.user.email
+//                 }
+//             });
+//         } else {
+//             return next(createUnauthorizedError('not authenticated'));
+//         }
+//     } catch (error) {
+//         next(error);
+//     }
+// }
+
 export { handleSignup, handleLogin };
