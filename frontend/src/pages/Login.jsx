@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 // useNavigate
-import { useNavigate } from 'react-router-dom' // useNAvigation = programatic navigation
+import { useNavigate, useSearchParams } from 'react-router-dom' // useNAvigation = programatic navigation
 // Auth hook
 import { useAuth } from '../hooks/useAuth'
 // Layout
@@ -18,6 +18,24 @@ import { ToastContainer, toast, Bounce } from 'react-toastify';
 
 
 const Login = () => {
+  const [ searchParams, setSearchParams ] = useSearchParams();
+  useEffect(() => {
+    const authStatus = searchParams.get('auth');
+    if(authStatus === 'signup_success'){
+      toast.success('Signup successfully! Proceed to login.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
+    }
+  }, [searchParams, setSearchParams])
+  
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');

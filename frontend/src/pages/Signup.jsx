@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import axios from 'axios'
 // Layout
 import AuthLayout from '../components/AuthLayout'
+// UseNavigate
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
 // Icons
 import Google from '../assets/google.svg'
 import Github from '../assets/github-mark.svg'
@@ -14,6 +17,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const navigate = useNavigate();
 
   const {
     register,
@@ -36,14 +40,26 @@ const Signup = () => {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/user/`,submitData);
       // console.log(response); // debugging purpose
       setSuccessMsg("Account created successfully! You can now login.");
+      navigate('/login/?auth=signup_success')
       reset();  // After a successful signup, reset() clears all the fields so the form is empty again.
     } catch (error) {
       if (error.response) {
-        setErrorMsg(error.response.data.message || "Signup failed.")
+        setErrorMsg(error.response.data.error || "Signup failed.")
       } else {
         setErrorMsg("Network error. Please try again.")
       }
-      console.error("Signup error:", error);
+      // console.error("Signup error:", error);
+      toast.error(error.response.data.error || "Signup failed! Please, Try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
     } finally {
       setLoading(false);
     }
@@ -64,6 +80,20 @@ const Signup = () => {
     <div>
       <AuthLayout title='Sign-up'>
         <div className='flex flex-col w-full'>
+
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+            transition={Bounce}
+          />
   
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
