@@ -4,7 +4,25 @@ import { Search } from 'lucide-react';
 import { TrendingUp } from 'lucide-react';
 import { Bolt } from 'lucide-react';
 
+import { useAuth } from'../hooks/useAuth';
+
+import AlertDialogue from './AlertDialogue';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 const Sidebar = () => {
+  const { logout, isAuthenticated } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  }
   return (
     <div className='border-r-2 border-neon w-24 py-4 px-10 h-screen fixed flex flex-col justify-between'>
       {/* Upper sidebar */}
@@ -32,10 +50,30 @@ const Sidebar = () => {
         <div>
 
           {/* settings */}
-          <div className='flex flex-col items-center py-7'>
-            <Bolt />
+          {isAuthenticated && <div className='flex flex-col items-center py-7'>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                  <Bolt className='cursor-pointer ' />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='bg-black text-white'>
+                <DropdownMenuLabel className=''>settings</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className='cursor-pointer'>Profile</DropdownMenuItem>
+                <DropdownMenuItem asChild>  
+                  {/* asChild = This prevents event conflicts between the dropdown and alert dialog */}
+                  <AlertDialogue 
+                    trigger='Log-out' 
+                    title='Are you sure?' 
+                    description='This action will log you out of your account.'
+                    onConfirm={handleLogout}
+                    triggerClassName='bg-red-500 text-white font-bold cursor-pointer p-1 rounded-md hover:bg-red-600'
+                  />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <p className='text-white'>settings</p>
-          </div>
+          </div>}
+          
         </div>
     </div>
   )

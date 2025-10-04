@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react'
 import axios from 'axios';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
 
 // Create the authentication context
 const AuthContext = createContext(null);
@@ -40,11 +41,35 @@ export const AuthProvider = ({ children }) => {
     //  function to handle logout
     const logout = async () => {
       try {
-        await axios.get(`${import.meta.env.VITE_API_URL}/auth/logout`,{
+        await axios.get(`${import.meta.env.VITE_API_URL}/user/logout`,{
           withCredentials: true
         });
+
+        toast.success('Logout succesfully!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
+
       } catch (error) {
         console.error('Logout error:', error);
+        toast.error(`${error.message || 'Logout Error'}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+      });
       } finally {
         setUser(null);
         setIsAuthenticated(false);

@@ -77,14 +77,6 @@ router.get('/github/callback',
   });
 
 
-// ==================== COMMON LOGOUT ====================
-
-// OAuth logout route
-router.get('/logout', (req, res) => {
-    res.clearCookie('uid');
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`);
-});
-
 
 router.get('/me', async (req,res) => {
     try {
