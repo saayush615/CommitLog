@@ -5,7 +5,6 @@ import AuthLayout from '../components/AuthLayout'
 // Icons
 import Google from '../assets/google.svg'
 import Github from '../assets/github-mark.svg'
-
 // React-hook-form
 import { useForm } from 'react-hook-form'
 // Motion
@@ -65,18 +64,6 @@ const Signup = () => {
     <div>
       <AuthLayout title='Sign-up'>
         <div className='flex flex-col w-full'>
-
-          {/* Success/Error Messages */}
-          {successMsg && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-              {successMsg}
-            </div>
-          )}
-          {errorMsg && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {errorMsg}
-            </div>
-          )}
   
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} noValidate>

@@ -10,7 +10,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const Navbar = () => {
-  const { isAuthenticated, isLoading, user, logout } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -24,8 +24,9 @@ const Navbar = () => {
 
         {!isAuthenticated ? (
           // Show login/signup buttons for non-authenticated users
-          <>
-            <Button 
+          <div className='hidden md:block'>
+            <Button
+              className='cursor-pointer' 
               variant="secondary" 
               onClick={() => navigate('/signup')}
 
@@ -38,13 +39,14 @@ const Navbar = () => {
             </Button>
             
             <Button 
+              className='m-5 cursor-pointer'
               variant="secondary" 
               onClick={() => navigate('/login')}
             >
               Login
             </Button>
             
-          </>
+          </div>
         ) : (
           // Show user menu and create button for authenticated users
           <>

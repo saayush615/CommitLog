@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import axios from 'axios'
 // useNavigate
 import { useNavigate } from 'react-router-dom' // useNAvigation = programatic navigation
+// Auth hook
+import { useAuth } from '../hooks/useAuth'
 // Layout
 import AuthLayout from '../components/AuthLayout'
 // Icons
@@ -11,6 +13,8 @@ import Github from '../assets/github-mark.svg'
 import { useForm } from 'react-hook-form'
 // Motion
 import { motion, scale } from "motion/react"
+// React-tostify
+import { ToastContainer, toast, Bounce } from 'react-toastify';
 
 
 const Login = () => {
@@ -18,6 +22,7 @@ const Login = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
     const {
       register,
@@ -36,21 +41,31 @@ const Login = () => {
           withCredentials: true  // This is crucial for receiving cookies
         });
         // console.log(response); //debugging
-        setSuccessMsg("Login Successfully!");
-        reset();
 
-        // Programatic navigation after sucessfull login
-        setTimeout(() => { 
-          navigate('/'); // Navigate to homepage
-         }, 1000);
+        navigate('/?auth=login_success'); // Navigate to homepage
+        login(response.data.user);
+        setSuccessMsg("Login Successfully!");
+
+        reset();
 
       } catch (error) {
         if (error.response) {
-          setErrorMsg(error.response.data.message || "Signup failed.")
+          setErrorMsg(error.response.data.error || "Login failed.")
         } else {
           setErrorMsg("Network error. Please try again.")
         }
-        console.error("Login error: ", error);
+        // console.error("Login error: ", error);
+        toast.error(error.response.data.error || "Login failed! Please, Try again", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
       } finally {
         setLoading(false);
       }
@@ -71,12 +86,19 @@ const Login = () => {
       <AuthLayout title='Login'>
         <div className='flex flex-col w-full'>
 
-          {/* Error Message */}
-          {errorMsg && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {errorMsg}
-            </div>
-          )}
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+            transition={Bounce}
+          />
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
