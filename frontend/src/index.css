@@ -175,6 +175,13 @@
   li p {
     @apply mt-1 mb-1;
   }
+
+  a {
+    @apply text-purple-400 underline underline-offset-2 transition-colors duration-150 cursor-pointer;
+  }
+  a:hover {
+    @apply text-purple-200;
+  }
 }
 
 body{
