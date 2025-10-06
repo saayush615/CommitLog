@@ -3,11 +3,17 @@ import { Toggle } from "@/components/ui/toggle"
 import { useEditor, EditorContent} from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Menubar from './Menubar'
+import TextAlign from '@tiptap/extension-text-align'
 
 const Editor = () => {
 
     const editor = useEditor({
-        extensions: [StarterKit], // define your extension array
+        extensions: [
+          StarterKit,
+          TextAlign.configure({
+            types: ['heading', 'paragraph'],
+          }),
+        ], // define your extension array
         content: '<p>Hello World!</p>', //intital content
         editorProps: {
           attributes: {
