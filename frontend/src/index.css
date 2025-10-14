@@ -126,6 +126,12 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.ProseMirror {
+  white-space: pre-wrap;  /* Ensures ProseMirror editor preserves line breaks and spacing by applying 'white-space: pre-wrap' */
+
+}
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -176,10 +182,11 @@
     @apply mt-1 mb-1;
   }
 
-  a {
+  /* Scope link styles to only ProseMirror editor content */
+  .ProseMirror a {
     @apply text-purple-400 underline underline-offset-2 transition-colors duration-150 cursor-pointer;
   }
-  a:hover {
+  .ProseMirror a:hover {
     @apply text-purple-200;
   }
 }

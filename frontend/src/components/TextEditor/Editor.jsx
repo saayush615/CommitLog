@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Toggle } from "@/components/ui/toggle"
 import { useEditor, EditorContent} from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Menubar from './Menubar'
 import TextAlign from '@tiptap/extension-text-align'
 
-const Editor = () => {
+const Editor = ({ content, setContent }) => {
 
     const editor = useEditor({
         extensions: [
@@ -57,12 +57,18 @@ const Editor = () => {
             },
           }),
         ], // define your extension array
-        content: '<p>Hello World!</p>', //intital content
+        content: '', //intital content
         editorProps: {
           attributes: {
-            class: 'min-h-[156px] border rounded-md bg-zinc-800 py-2 px-3 text-white'
+            class: 'min-h-[606px] max-h-[606px] overflow-y-auto border rounded-md bg-zinc-800 py-2 px-3 text-white focus:outline focus:outline-white'
           }
         },
+        onUpdate: ({ editor }) => {
+          const html = editor.getHTML();
+          const text = editor.getText();
+          console.log('HTML Content:', html);
+          // console.log('Text Content:', text);
+        }
         
     })
 
