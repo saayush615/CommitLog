@@ -46,6 +46,7 @@ app.use(cookieParser());
 
 **Purpose:**
 >These middlewares ensure that request data (from APIs or forms) is automatically converted to JavaScript objects, simplifying data handling in route handlers.
+
 ---
 
 ## Topic 1: Database Configuration
@@ -290,3 +291,264 @@ return next(createNotFoundError('Blog')); // Creates 404 error
 ```
 ---
 
+## Topic 4: Authentication & Auth middleware
+
+### JWT Token Management
+```js
+import jwt from 'jsonwebtoken';
+
+function generateToken(user) {}
+function verifyToken(token) {}
+```
+#### Authentication Middleware Chain
+```js
+// middlewares/auth.js
+
+// Optional authentication check
+async function checkAuth(req, res, next) {}
+
+// Required authentication
+async function requireAuth(req, res, next) {}
+
+// Author authorization (ownership check)
+async function requireAuthor(req, res, next) {}
+```
+_Middleware Hierarchy_:
+
+- `checkAuth`: Sets req.user if valid token exists (optional)
+- `requireAuth`: Ensures user is authenticated (mandatory)
+- `requireAuthor`: Ensures user owns the resource (ownership)
+
+#### Usage in Routes:
+```js
+// Public routes
+router.get('/read', handleReadBlog);
+
+// Protected routes (auth required)
+router.post('/create', requireAuth, handleCreateBlog);
+
+// Author-only routes (auth + ownership)
+router.put('/:id', requireAuth, requireAuthor, handleUpdateBlog);
+router.delete('/:id', requireAuth, requireAuthor, handleDeleteBlog);
+```
+---
+
+## Topic 5: OAuth - Passportjs
+OAuth (Open Authorization) is a secure way to let users log in using their existing accounts from other services like Google or GitHub, without sharing their passwords with your app.
+
+#### How OAuth Works (Simple Flow)
+- **User clicks "Continue with Google"** → Redirected to Google's login page
+- **User logs in to Google** → Google asks "Allow CommitLog to access your profile?"
+- **User approves** → Google sends user back to your app with a special code
+- **Your app exchanges the code** → Gets user's profile information from Google
+- **Your app creates/logs in the user** → Sets authentication cookie
+
+
+#### Step 1: Passport Configuration
+
+```js
+// config/passport.js
+import passport from "passport";
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+
+// Configure Google OAuth Strategy
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,   // make it in console.cloud.google.com
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "/auth/google/callback"
+}, async (accessToken, refreshToken, profile, done) => {
+    // This function runs when Google sends back user data
+}));
+
+export default passport;
+```
+_What this does_:
+
+- Sets up how Passport should handle Google/GitHub authentication
+- Defines what happens when user data comes back from the OAuth provider
+- Handles 3 scenarios: existing OAuth user, existing email user, or completely new user
+
+#### Step 2: User Schema for OAuth Support
+```js
+// models/user.js
+const userSchema = new mongoose.Schema({
+    password: {
+        type: String,
+        required: function() {
+            // Password only required if user didn't sign up via OAuth
+            return !this.googleId && !this.githubId;
+        }
+    },
+    googleId: { // Stores unique Google user identifier
+        type: String, 
+        unique: true,
+        sparse: true  // Allow the null value but ensures uniqueness when present
+     },
+    authProvider: { // Tracks how user registered
+        type: String, 
+        enum: ['local', 'google', 'github'], 
+        default: 'local' 
+    }
+});
+```
+_What this does_:
+
+- Stores OAuth IDs (googleId, githubId) to link accounts
+- Makes password optional for OAuth users
+- Tracks how the user signed up (authProvider)
+- Stores profile picture from OAuth provider
+
+#### Step 3: OAuth Routes
+```js
+// routes/auth.js
+import express from 'express';
+import passport from '../config/passport.js';
+import { generateToken } from '../services/auth.js';
+
+const router = express.Router();
+
+// Step 1: Start Google OAuth flow
+router.get('/google',
+    passport.authenticate('google', {
+        scope: ['profile', 'email'] // Request access to profile and email
+    })
+);
+
+// Step 2: Handle Google's response
+router.get('/google/callback', 
+    passport.authenticate('google', { 
+        failureRedirect: `${process.env.FRONTEND_URL}/login?error=oauth_failed`,
+        session: false // We use JWT instead of sessions
+    }),
+    async (req, res) => {
+        try {
+            // Generate JWT token for authenticated user
+            const token = generateToken(req.user);
+
+            // Set secure HTTP-only cookie
+            res.cookie("uid", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            });
+
+            // Redirect to frontend with success message
+            res.redirect(`${process.env.FRONTEND_URL}/?auth=google_success`);
+        } catch (error) {
+            res.redirect(`${process.env.FRONTEND_URL}/login?error=callback_failed`);
+        }
+    }
+);
+
+```
+
+_What this does_:
+
+- `/auth/google` → Redirects user to Google's consent screen
+- `/auth/google/callback` → Handles Google's response, creates JWT, sets cookie
+- `/auth/me` → Checks if user is currently authenticated
+
+#### Step 4: Express App Setup
+```js
+// index.js
+import express from 'express';
+import passport from 'passport';
+import './config/passport.js'; // Import passport configuration
+
+const app = express();
+
+// Initialize Passport middleware
+app.use(passport.initialize());
+
+// Other middleware...
+app.use(checkAuth); // Custom middleware to verify JWT tokens
+
+// Routes
+app.use('/auth', authRoute);   // passport js Oauth route
+```
+_What this does_:
+
+- Imports and initializes Passport
+- Sets up middleware to check authentication on each request
+
+#### Step 5: Frontend Integration
+```js
+// Login.jsx - Frontend component
+const handleGoogleAuth = () => {
+    // Redirect to backend OAuth route
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+};
+
+const handleGitHubAuth = () => {
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/github`;
+};
+
+// In JSX
+<button onClick={handleGoogleAuth}>
+    Continue with Google
+</button>
+```
+```js
+// Home.jsx - Handle OAuth success/failure
+useEffect(() => {
+    const authStatus = searchParams.get('auth');
+    if (authStatus === 'google_success' || authStatus === 'github_success') {
+        toast.success('Login Successfully!');
+        setSearchParams({}); // Clean up URL
+    }
+}, [searchParams]);
+```
+_What this does_:
+
+- Provides buttons that redirect to OAuth flow
+- Handles success/failure messages when user returns
+
+---
+
+## Topic 6: File Upload with Multer
+
+### Multer Configuration
+> Read services/upload.js (to understand configurations).
+
+ #### Usage in Routes
+ ```js
+ // routes/blog.js
+router.post('/create', requireAuth, upload.single('coverImage'), handleCreateBlog);
+ ```
+
+ #### Error Handling for File Uploads
+File upload errors are handled in the global error handler:
+```js
+// middlewares/errorHandler.js
+if (error instanceof multer.MulterError) {
+    switch(error.code) {
+        case 'LIMIT_FILE_SIZE':
+        case 'LIMIT_UNEXPECTED_FILE':
+        default:
+    }
+}
+```
+---
+
+---
+
+## Topic 7: Password Security
+
+### Password Hashing with bcrypt
+```js
+// services/hash.js
+import bcrypt from 'bcryptjs';
+
+async function hashPassword(password) {
+    const hash = await bcrypt.hash(password, 10); // 10 salt rounds
+    return hash;
+}
+
+async function comparePassword(password, hash) {
+    const isMatch = await bcrypt.compare(password, hash);
+    return isMatch;
+}
+```
+
+---
