@@ -501,23 +501,46 @@ useEffect(() => {
 npm install @tiptap/pm @tiptap/react @tiptap/starter-kit
 ```
 #### Editor Configuration
+> Note: For better understanding go to src/components/Texteditor/Editor
 ```js
+import { useEditor, EditorContent} from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Menubar from './Menubar'
+
 // components/TextEditor/Editor.jsx
 const editor = useEditor({
-    extensions: [
+    extensions: [  // define your extension array
         TextAlign.configure({
             types: ['heading', 'paragraph'],
         }),
-        StarterKit.configure({
+        StarterKit.configure({  //StarterKit is a collection of the most popular Tiptap extensions
             openOnClick: false,
             autolink: true,
             defaultProtocol: 'https',
         }),
     ],
-    content: content || '',
-    onUpdate: ({ editor }) => {
-        const html = editor.getHTML();
-        setContent(html); // Update parent state
-    }
+    content: content || '', // initial content
+    // .. for better understanding go to src/components/Texteditor/Editor
 });
+
+return (
+    <div>
+      <Menubar editor={editor} />
+      <EditorContent editor={editor} />
+    </div>
+  )
 ```
+#### Menubar
+> Note: For better understanding go to src/components/Texteditor/Menubar
+```jsx
+<Toggle 
+  pressed={editor.isActive('heading', { level: 1 })}
+  onPressedChange={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+  className='hover:text-black cursor-pointer'
+>
+  <Heading1 className='h-4 w-4'/>
+</Toggle>
+```
+
+> Read components/texteditor/TitleEditor for better understanding, Read CreateBlog for understanding Validations
+

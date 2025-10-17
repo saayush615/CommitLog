@@ -65,9 +65,7 @@ const Editor = ({ content, setContent }) => {
         },
         onUpdate: ({ editor }) => {
           const html = editor.getHTML();
-          const text = editor.getText();
-          console.log('HTML Content:', html);
-          // console.log('Text Content:', text);
+          setContent(html);
         }
         
     })

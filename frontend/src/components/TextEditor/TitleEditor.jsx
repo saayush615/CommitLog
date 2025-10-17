@@ -28,7 +28,7 @@ const TitleEditor = ({ title, setTitle }) => {
               limit,
             })
         ],
-        content: '', // Empty initial content
+        content: title || '', // Empty initial content
         editorProps: {
             attributes: {
                 class: 'text-3xl font-bold text-white bg-zinc-800 rounded rounded-md border p-3 placeholder:text-gray-400 focus:outline-2 focus:outline-white min-h-24 leading-6',
@@ -54,8 +54,7 @@ const TitleEditor = ({ title, setTitle }) => {
             }
             
             const text = editor.getText();
-            const html = editor.getHTML();
-            onUpdate && onUpdate({ text, html });
+            setTitle(text);
         }
 
     })
@@ -76,12 +75,7 @@ const TitleEditor = ({ title, setTitle }) => {
 
   return (
     <div className="title-editor mb-2">
-      <EditorContent 
-        editor={editor}
-        placeholder="Enter your blog title..."
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <EditorContent editor={editor} />
       {editor && (
         <div className="text-xs mt-1 flex justify-between">
           <span className={`${isAtLimit ? 'text-red-400' : 'text-gray-400'}`}>
