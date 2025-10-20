@@ -1,4 +1,4 @@
-import React, { useEffect} from 'react'
+import React, { useState ,useEffect} from 'react'
 // Components
 import Layout from '../components/Layout'
 import Card from '../components/Card'
@@ -6,8 +6,11 @@ import Card from '../components/Card'
 import { Minus } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom'
 import { ToastContainer, toast, Bounce } from 'react-toastify';
+import axios from 'axios';
 
 const Home = () => {
+  const [loading, setLoading] = useState(false);
+  const [blogs, setBlogs] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();  //  lets you read and update the query string parameters in the URL
 
   useEffect(() => {
@@ -47,6 +50,25 @@ const Home = () => {
       setSearchParams({});
     }
   }, [searchParams, setSearchParams])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/blog/read`);
+        if(response.data.success){
+          setBlogs(response.data.blogs);
+          console.log(response.data.blogs)
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  },[])
   
 
   return (
@@ -72,9 +94,19 @@ const Home = () => {
         <Minus strokeWidth={5} className='ml-3' />
         <p className='text-white font-sans text-lg'>Latest</p>
       </div>
-      <Card />
-      <Card />
-      <Card />
+      {blogs.map((blog) => (
+        <Card 
+          key={blog._id} 
+          blogId={blog._id}
+          title={blog.title} 
+          content={blog.content} 
+          username={blog.author.username} 
+          publishdate={blog.updatedAt} 
+          isProfile={false} 
+        />
+      ))
+      }
+      
     </Layout>
   )
 }

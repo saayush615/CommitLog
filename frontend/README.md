@@ -255,6 +255,113 @@ async function uploadBlogWithImage(blogData, imageFile) {
 
 ---
 
+## Note 4: Small & Random mistakes
+
+#### Mistake 1:
+```js
+// pages/Home.jsx
+useEffect(async () => {  // ❌ WRONG!
+  setLoading(true);
+  try {
+    const blogs = await axios.get(`${import.meta.env.VITE_API_URL}/blog/read`);
+    console.log(blogs);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setLoading(false);
+  }
+},[])
+```
+_Why This Is Wrong_:
+useEffect expects a function that returns either:
+- Nothing (undefined)
+- A cleanup function
+> But async functions ALWAYS return a Promise, even if you don't explicitly return anything. Hooks have specific rules about what they can return
+
+---
+
+#### Note 5: JS topics
+#### Date and Time
+_Overview_
+
+- The Date object represents a point in time as milliseconds since the Unix epoch 1970-01-01T00:00:00Z.
+- Internally it's an integer number of milliseconds; formatting/parsing and timezone display are separate concerns.
+
+_Creating dates_
+
+- **new Date()** — now
+- **new Date(value)** — from milliseconds since epoch
+- **new Date(dateString)** — parsed string (implementation-dependent; prefer ISO 8601)
+- **new Date(year, monthIndex, day, hours, minutes, seconds, ms)** — local time (monthIndex is 0–11)
+
+_Important static functions_
+
+- **Date.now()** — returns current time in milliseconds (number)
+  - Example: const ms = Date.now(); // ms since epoch
+- **Date.parse(string)** — returns milliseconds or NaN (like new Date(string).getTime())
+- **Date.UTC(year, monthIndex, ...)** — returns ms for a UTC date
+
+_Common instance methods_
+
+- **getTime()** — ms since epoch (same as Number(date))
+- **getFullYear()**, **getMonth()** (0–11), **getDate()** (1–31)
+- getHours(), getMinutes(), getSeconds(), getMilliseconds()
+- getUTCFullYear(), getUTCMonth(), ... — UTC equivalents
+- setTime(ms), setFullYear(...), setMonth(...), ... — mutators
+
+_Formatting / serialization_
+
+- date.toISOString() — ISO 8601 in UTC (recommended for network/storage)
+- date.toUTCString(), date.toString() — human readable
+- date.toLocaleString()/toLocaleDateString()/toLocaleTimeString(options) — localized output
+
+_Reference for parsing/formatting safety_
+
+- Use ISO 8601 with timezone when possible: 'YYYY-MM-DDTHH:mm:ss.sssZ'
+- For human-friendly output, prefer toLocaleDateString with options.
+
+#### Arrow functions
+
+_Arrow functions have two body styles_:
+
+- **Concise body** (no { }) — the single expression after => is **implicitly returned**.
+- **Block body** ({ }) — you get a statement block and **must use return to return a value**; otherwise the function returns undefined.
+
+_Parameter parentheses_:
+
+- Single parameter: you may omit parentheses: `x => x + 1`
+- Zero or multiple parameters: use parentheses: `() => …, (a, b) => …`
+- Returning an object literal: wrap the object in parentheses in a concise body: `() => ({ a: 1 })` (otherwise {} is parsed as a block).
+
+_Example:_
+
+```js
+// concise body -> implicit return
+const add = (a, b) => a + b;
+
+// concise body returning an object -> need parentheses
+const makeObj = () => ({ ok: true });
+
+// block body -> explicit return required
+const addBlock = (a, b) => {
+    return a + b;
+};
+
+// block body for side-effects (no return needed)
+const handleCardClick = () => {
+    navigate(`/blog/${blogId}`); // this is fine — it's a side effect
+};
+```
+
+_Points to remember:_
+
+- If you use { } and forget `return`, the function returns `undefined` (your original confusion).
+- If you want to both do side effects and return a value, use the block form and `return`.
+- Use concise form when the function is a **single expression** and you want to return it.
+- Use block form when you need **multiple statements**, **side effects**, **control flow**, or to **explicitly `return`**.
+
+---
+
 ## Topic 1: Authentication Context & State Management
 #### Context API Implementation
 ```js
