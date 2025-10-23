@@ -599,6 +599,16 @@ useEffect(() => {
   }
 }, [searchParams, setSearchParams]);
 ```
+
+#### URL Route Parameters
+```js
+// Route definition: /blog/:id
+// URL: /blog/123
+import { useParams } from 'react-router-dom';
+
+const { id } = useParams(); // Get blog ID from URL, id = 123
+
+```
 ---
 
 ## Topic 6: Rich Text Editor (TipTap)

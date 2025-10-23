@@ -27,6 +27,8 @@ const blogSchema = new mongoose.Schema({
         },
         createdAt: {
             type: Date,
+            // Use Date.now (no parentheses) - function reference called on each document creation
+            // Date.now() would execute once at schema definition and give same timestamp to all documents
             default: Date.now
         }
     }],

@@ -18,7 +18,7 @@ const Card = ({ blogId, title, content, username, publishdate, isProfile}) => {
   
   return (
     <div 
-      className='grid grid-cols-8 gap-8 m-4 p-4 min-h-[200px] max-h-[200px] w-full max-w-7xl cursor-pointer'
+      className='grid grid-cols-8 gap-8 min-h-[200px] max-h-[200px] w-full max-w-7xl cursor-pointer'
       onClick={handleCardClick}
     >
       {/* left section */}

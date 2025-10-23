@@ -1,6 +1,6 @@
 import express from 'express';
 import { requireAuth, requireAuthor } from '../middlewares/auth.js'
-import { handleCreateBlog, handleReadBlog, handleReadBlogById, handleUpdateBlog, handleDeleteBlog } from '../controllers/blog.js';
+import { handleCreateBlog, handleReadBlog, handleReadBlogById, handleUpdateBlog, handleDeleteBlog, handleToggleLike, handleAddComment, handleDeleteComment } from '../controllers/blog.js';
 import { upload } from '../services/upload.js';
 
 const router = express.Router();
@@ -15,10 +15,9 @@ router.post('/create', requireAuth, upload.single('coverImage'), handleCreateBlo
 // router.get('read-with-interaction/:id', requireAuth, handleReadBlogWithInteractions);
 
 // Interaction route (auth required)
-// router.post('/:id/like', requireAuth, handleToggleLike);
-// router.post('/:id/share', requireAuth, handleShareBlog);
-// router.post('/:id/comment', requireAuth, handleAddComment);
-// router.delete('/:id/comment/:commentId', requireAuth, handleDeleteComment);
+router.post('/:id/like', requireAuth, handleToggleLike);
+router.post('/:id/comment', requireAuth, handleAddComment);
+router.delete('/:id/comment/:commentId', requireAuth, handleDeleteComment);
 
 // Author-only routes (auth + ownership required)
 router.put('/update/:id', requireAuth, requireAuthor, upload.single('coverImage'), handleUpdateBlog);

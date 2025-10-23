@@ -1,6 +1,7 @@
 import Blog from '../models/blog.js';
 import fs from 'fs';
 import { createValidationError, createNotFoundError, createForbiddenError } from '../utils/errorFactory.js';
+import { verifyToken } from '../services/auth.js';
 
 async function handleCreateBlog(req,res, next) {
     const { title, content } = req.body;
@@ -66,10 +67,24 @@ async function handleReadBlogById(req,res, next)  {
             return next(createNotFoundError('Blog'));
         }
 
+        // Check if the authenticated user has liked this blog
+        let isLiked = false;
+        const token = req.cookies?.uid;
+
+        if (token) {
+            const user = verifyToken(token);
+            if (user && user.id) {
+                isLiked = blog.likes.some(like => like.user.toString() === user.id);
+            }
+        }
+
         return res.status(200).json({
             success: true,
             message: 'Blog fetched successfully', 
-            blog
+            blog: {
+                ...blog,
+                isLiked
+            }
         });
 
     } catch (err){
@@ -181,7 +196,7 @@ async function handleToggleLike(req, res, next) {
             isLiked = true;
         }
 
-        await blog.save();
+        await blog.save();  // Without blog.save(), your changes exist only in memory and disappear when the function ends! 
 
         return res.status(200).json({
             success: true,
@@ -195,10 +210,6 @@ async function handleToggleLike(req, res, next) {
     } catch (error) {
         next(error);
     }
-}
-
-async function handleShareBlog(req,res,next) {
-    // handle it later
 }
 
 async function handleAddComment(req,res,next) {
@@ -230,15 +241,15 @@ async function handleAddComment(req,res,next) {
         // populate the newly added comment with user info
         const populateBlog = await Blog.findById(blogId)
             .populate('comments.user', 'username firstname lastname')
-            .select('comments');
+            .select('comments');  // Projects only the comments field from the blog document. Excludes all other fields (like title, content, etc.)
 
-        const addComment = populatedBlog.comments[populateBlog.comments.length - 1];
+        const addComment = populateBlog.comments[populateBlog.comments.length - 1];
 
         return res.status(201).json({
             success: true,
             message: 'Comment added succesfully',
             data: {
-                comment: addedComment,
+                comment: addComment,
                 commentsCount: blog.commentsCount
             }
         });
@@ -325,5 +336,9 @@ export {
     handleReadBlog,
     handleReadBlogById,
     handleUpdateBlog,
-    handleDeleteBlog
+    handleDeleteBlog,
+    handleToggleLike,
+    handleAddComment,
+    handleDeleteComment
+
 };

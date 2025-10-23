@@ -58,10 +58,16 @@ const Home = () => {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/blog/read`);
         if(response.data.success){
           setBlogs(response.data.blogs);
-          console.log(response.data.blogs)
+          // console.log(response.data.blogs)
         }
       } catch (err) {
         console.log(err);
+        toast.error('Failed to load blog', {
+            position: "top-right",
+            autoClose: 5000,
+            theme: "dark",
+            transition: Bounce,
+        });
       } finally {
         setLoading(false);
       }

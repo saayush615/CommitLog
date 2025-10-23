@@ -8,6 +8,8 @@ import { useAuth } from'../hooks/useAuth';
 
 import AlertDialogue from './AlertDialogue';
 
+import { useNavigate } from 'react-router-dom'
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +20,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 const Sidebar = () => {
+  const navigate = useNavigate();
   const { logout, isAuthenticated } = useAuth();
+
+  const handleProfile = () => { 
+    navigate('/profile');
+   }
 
   const handleLogout = async () => {
     await logout();
@@ -58,7 +65,12 @@ const Sidebar = () => {
               <DropdownMenuContent className='bg-black text-white'>
                 <DropdownMenuLabel className=''>settings</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className='cursor-pointer'>Profile</DropdownMenuItem>
+                <DropdownMenuItem 
+                  className='cursor-pointer'
+                  onClick={handleProfile}
+                >
+                  Profile
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>  
                   {/* asChild = This prevents event conflicts between the dropdown and alert dialog */}
                   <AlertDialogue 
