@@ -89,7 +89,8 @@ router.get('/me', async (req,res) => {
                     username: req.user.username,
                     email: req.user.email,
                     firstname: req.user.firstname,
-                    lastname: req.user.lastname
+                    lastname: req.user.lastname,
+                    createdAt: req.user.createdAt
                 }
             });
         } else {

@@ -11,7 +11,8 @@ function generateToken(user) {
         username: user.username, 
         email: user.email,
         firstname: user.firstname,
-        lastname: user.lastname
+        lastname: user.lastname,
+        createdAt: user.createdAt
         }, 
         secret,
         { expiresIn: '24h' }
