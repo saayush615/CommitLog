@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search } from 'lucide-react';
-import { TrendingUp } from 'lucide-react';
-import { Bolt } from 'lucide-react';
+import { User, Search, TrendingUp, Bolt } from 'lucide-react';
+
+import { getInitials } from '../utils/textUtils'
 
 import { useAuth } from'../hooks/useAuth';
 
@@ -21,7 +21,7 @@ import {
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { logout, isAuthenticated } = useAuth();
+  const { logout, isAuthenticated, user } = useAuth();
 
   const handleProfile = () => { 
     navigate('/profile');
@@ -36,8 +36,13 @@ const Sidebar = () => {
         <div className='flex flex-col items-center gap-7'>
             {/* avatar */}
             <Avatar className='w-16 h-16 cursor-pointer'>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback className='bg-neon text-black'>CN</AvatarFallback>
+              <AvatarImage src={user?.profilePicture} alt={user?.username} />
+              <AvatarFallback className="bg-gray-700 text-gray-300">
+                  {user ? 
+                      getInitials(user.firstname, user.lastname) : 
+                      <User className="h-5 w-5" />
+                  }
+              </AvatarFallback>
             </Avatar>
 
             {/* search */}

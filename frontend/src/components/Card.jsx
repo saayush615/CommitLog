@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from "@/components/ui/badge"
+import { Heart, MessageCircle } from 'lucide-react';
 // Import utility functions
 import { stripAndTruncate } from '@/utils/textUtils'
 import { formatDate } from '@/utils/dateUtils'
 
-const Card = ({ blogId, title, content, username, publishdate, isProfile}) => {
+const Card = ({ blogId, title, content, username, publishdate, likesCount, commentsCount, isProfile}) => {
   const navigate = useNavigate();
   // Use the utility functions
   const displayContent = stripAndTruncate(content, 500);
@@ -45,6 +46,16 @@ const Card = ({ blogId, title, content, username, publishdate, isProfile}) => {
           <p className='line-clamp-4 overflow-hidden text-ellipsis leading-relaxed'>
             {displayContent}
           </p>
+          <div className='flex flex-row gap-4'>
+            <div className='flex flex-row gap-2'>
+              <Heart className='fill-red-500 h-5 w-5' />
+              {likesCount}
+            </div>
+            <div className='flex flex-row gap-2'>
+              <MessageCircle className='fill-blue-500 h-5 w-5' />
+              {commentsCount}
+            </div>
+          </div>
         </div>
       </div>
     </div>

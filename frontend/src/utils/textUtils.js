@@ -34,3 +34,15 @@ export const stripAndTruncate = (html, maxLength = 200) => {
   const plainText = stripHtml(html);
   return truncateText(plainText, maxLength);
 };
+
+/**
+ * Combine intials of first and last name
+ * @param {string} firstname - Firstname string of user
+ * @param {string} lastname - lastname string of user
+ * @returns {string} comined initials of firstname and lastname
+ */
+export const getInitials = (firstname, lastname) => {
+    const first = firstname?.charAt(0) || '';
+    const last = lastname?.charAt(0) || '';
+    return `${first}${last}`.toUpperCase() || '?';
+};

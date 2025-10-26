@@ -2,6 +2,7 @@ import React, { useState ,useEffect} from 'react'
 // Components
 import Layout from '../components/Layout'
 import Card from '../components/Card'
+import { Spinner } from "@/components/ui/spinner"
 // Icons
 import { Minus } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom'
@@ -61,7 +62,7 @@ const Home = () => {
           // console.log(response.data.blogs)
         }
       } catch (err) {
-        console.log(err);
+        // console.log(err.response.data);
         toast.error('Failed to load blog', {
             position: "top-right",
             autoClose: 5000,
@@ -75,6 +76,15 @@ const Home = () => {
 
     fetchData();
   },[])
+
+  if(loading) {
+    return (
+        <div className="flex justify-center items-center min-h-[400px]">
+            <Spinner className='text-white' />
+            <div className="text-white text-lg m-2">Loading...</div>
+        </div>
+    );
+  }
   
 
   return (
@@ -108,6 +118,8 @@ const Home = () => {
           content={blog.content} 
           username={blog.author.username} 
           publishdate={blog.updatedAt} 
+          likesCount={blog.likesCount}
+          commentsCount={blog.commentsCount}
           isProfile={false} 
         />
       ))

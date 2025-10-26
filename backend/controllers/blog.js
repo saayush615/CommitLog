@@ -93,6 +93,44 @@ async function handleReadBlogById(req,res, next)  {
     }
 }
 
+// Add this new function after handleReadBlogById
+async function handleReadBlogWithInteractions(req, res, next) {
+    const id = req.params.id;
+    
+    if (!id) {
+        return next(createValidationError('Blog id is required'));
+    }
+
+    try {
+        const blog = await Blog.findById(id)
+            .populate('author', 'firstname lastname username')
+            .populate('comments.user', 'firstname lastname username');
+        
+        if (!blog) {
+            return next(createNotFoundError('Blog'));
+        }
+
+        // Check if current user has liked this blog
+        let isLiked = false;
+        if (req.user) {
+            isLiked = blog.likes.some(like => like.user.toString() === req.user.id);
+        }
+
+        // Return blog with interaction data
+        return res.status(200).json({
+            success: true,
+            message: 'Blog fetched successfully',
+            blog: {
+                _doc: blog.toObject(), // Convert mongoose document to plain object
+                isLiked
+            }
+        });
+
+    } catch (err) {
+        next(err);
+    }
+}
+
 
 async function handleUpdateBlog(req, res, next) {
     try {
@@ -334,7 +372,7 @@ async function handleGetBlogStats(req,res,next) {
 export {
     handleCreateBlog,
     handleReadBlog,
-    handleReadBlogById,
+    handleReadBlogWithInteractions,
     handleUpdateBlog,
     handleDeleteBlog,
     handleToggleLike,
