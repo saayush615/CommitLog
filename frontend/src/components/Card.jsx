@@ -110,10 +110,10 @@ const Card = ({ blogId, title, content, username, publishdate, likesCount, comme
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className='w-40 text-white bg-black'>
                     <DropdownMenuItem 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/edit/${blogId}`);
-                      }}
+                      // onClick={(e) => {
+                      //   e.stopPropagation();
+                      //   navigate(`/edit/${blogId}`);
+                      // }}
                       className='cursor-pointer flex items-center gap-2'
                     >
                       <Edit className='h-4 w-4' />
