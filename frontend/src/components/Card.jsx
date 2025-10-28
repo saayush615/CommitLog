@@ -112,7 +112,6 @@ const Card = ({ blogId, title, content, username, publishdate, likesCount, comme
                     <DropdownMenuItem 
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: Implement edit functionality
                         navigate(`/edit/${blogId}`);
                       }}
                       className='cursor-pointer flex items-center gap-2'
