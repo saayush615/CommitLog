@@ -6,49 +6,23 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Card from '../components/Card'
 import { ToastContainer, toast, Bounce } from 'react-toastify'
+import { useAuth } from '../hooks/useAuth'
+import { getInitials } from '../utils/textUtils'
+import { Spinner } from "@/components/ui/spinner"
 
 const Profile = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true)
-    const [userLoading, setUserLoading] = useState(true)
-    const [user, setUser] = useState(null)
     const [blogs, setBlogs] = useState([])
     const [errorMsg, setErrorMsg] = useState(null)
 
-    // Fetch user profile data
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            setUserLoading(true)
-            try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, {
-                    withCredentials: true
-                })
-                
-                if (response.data.success) {
-                    setUser(response.data.user)
-                }
-            } catch (err) {
-                console.error('Error fetching user profile:', err)
-                setErrorMsg('Failed to load profile')
-                toast.error('Failed to load profile', {
-                    position: "top-right",
-                    autoClose: 5000,
-                    theme: "dark",
-                    transition: Bounce,
-                })
-            } finally {
-                setUserLoading(false)
-            }
-        }
-
-        fetchUserProfile()
-    }, [])
+    const { user } = useAuth();
 
     // Fetch user's blogs
     useEffect(() => {
         const fetchUserBlogs = async () => {
             if (!user) return
-            
+            // console.log(user)
             setLoading(true)
             try {
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/blog/read`, {
@@ -64,6 +38,7 @@ const Profile = () => {
                 }
             } catch (err) {
                 console.error('Error fetching blogs:', err)
+                setErrorMsg(err);
                 toast.error('Failed to load blogs', {
                     position: "top-right",
                     autoClose: 5000,
@@ -78,12 +53,10 @@ const Profile = () => {
         fetchUserBlogs()
     }, [user])
 
-    // Get user initials for avatar fallback
-    const getUserInitials = () => {
-        if (!user) return 'U'
-        const firstInitial = user.username?.[0]?.toUpperCase() || 'U'
-        return firstInitial
-    }
+    // Handle delete Blog
+    const handleBlogDelete = (deletedBlogId) => {
+        setBlogs(prevBlogs => prevBlogs.filter(blog => blog._id !== deletedBlogId));
+    };
 
     // Format join date
     const formatJoinDate = (timestamp) => {
@@ -92,14 +65,6 @@ const Profile = () => {
             year: 'numeric',
             month: 'long'
         })
-    }
-
-    if (userLoading) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                <div className="text-white text-lg">Loading profile...</div>
-            </div>
-        )
     }
 
     if (errorMsg && !user) {
@@ -147,14 +112,17 @@ const Profile = () => {
                     {/* Avatar and Basic Info */}
                     <div className="flex flex-col items-center text-center mb-6">
                         <Avatar className="w-24 h-24 md:w-32 md:h-32 mb-4 border-4 border-neon">
-                            <AvatarImage src={user?.profilePicture || "https://github.com/shadcn.png"} />
+                            <AvatarImage src={user?.profilePicture} alt={user?.username} />
                             <AvatarFallback className="bg-neon text-black text-3xl font-bold">
-                                {getUserInitials()}
+                                {user ? 
+                                    getInitials(user.firstname, user.lastname) : 
+                                    <UserIcon className="h-5 w-5" />
+                                }
                             </AvatarFallback>
                         </Avatar>
 
                         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                            {user?.username || 'Anonymous'}
+                            {user?.firstname || 'Anonymous'}
                         </h1>
                         
                         <p className="text-gray-400 text-sm md:text-base">
@@ -233,6 +201,7 @@ const Profile = () => {
                                     likesCount={blog.likesCount}
                                     commentsCount={blog.commentsCount}
                                     isProfile={true}
+                                    onDelete={handleBlogDelete}
                                 />
                             ))}
                         </div>

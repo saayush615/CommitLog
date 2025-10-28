@@ -2,24 +2,9 @@ import React, { useEffect} from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from 'lucide-react';
 import { getInitials } from '../utils/textUtils'
+import { formatDateDiff } from '../utils/dateUtils'
 
-const CommentCard = ({ comment }) => {
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - date) / 1000);
-
-        if (diffInSeconds < 60) return 'just now';
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-        
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-        });
-    };
+const CommentCard = ({ comment, onDelete }) => {
 
     return (
         <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
@@ -45,7 +30,7 @@ const CommentCard = ({ comment }) => {
                             @{comment.user?.username}
                         </span>
                         <span className="text-gray-500 text-sm">
-                            · {formatDate(comment.createdAt)}
+                            · {formatDateDiff(comment.createdAt)}
                         </span>
                     </div>
                     <p className="text-gray-200 leading-relaxed">

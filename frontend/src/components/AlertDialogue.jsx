@@ -10,28 +10,40 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-
-const AlertDialogue = ({ trigger, title, description, onConfirm, triggerClassName }) => {
+const AlertDialogue = ({ trigger, title, description, onConfirm, onCancel, triggerClassName, isOpen }) => {
     return (
-        <AlertDialog>
-            {/* asChild = This tells the trigger to use its child element as the trigger instead of creating a new button */}
-        <AlertDialogTrigger asChild >
-            <div className={triggerClassName}>
-                {trigger}
-            </div>
-        </AlertDialogTrigger>  
-        <AlertDialogContent className='bg-black'>
-            <AlertDialogHeader>
-            {title && <AlertDialogTitle>{ title }</AlertDialogTitle>}
-            {description && <AlertDialogDescription>
-                {description}
-            </AlertDialogDescription>}
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-            <AlertDialogCancel className='bg-black'>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirm}>Continue</AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
+        <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel?.()}>
+            {trigger && (
+                <AlertDialogTrigger asChild>
+                    <div className={triggerClassName}>
+                        {trigger}
+                    </div>
+                </AlertDialogTrigger>
+            )}
+            <AlertDialogContent className='bg-black'>
+                <AlertDialogHeader>
+                    {title && <AlertDialogTitle className="text-white">{title}</AlertDialogTitle>}
+                    {description && (
+                        <AlertDialogDescription className="text-gray-400">
+                            {description}
+                        </AlertDialogDescription>
+                    )}
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel 
+                        className='bg-black text-white hover:bg-gray-800'
+                        onClick={onCancel}
+                    >
+                        Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                        onClick={onConfirm}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                        Continue
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
         </AlertDialog>
     )
 }

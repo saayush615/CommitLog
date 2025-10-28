@@ -448,6 +448,64 @@ const numbers = [1, 2, 3];
 Math.max(...numbers); // Same as Math.max(1, 2, 3)
 ```
 
+#### Event Handling Methods
+**1. preventDefault()** - Stops Default Browser Behavior
+_What it does_: Prevents the browser's default action for an event.
+_common use case:_
+```jsx
+// ✅ Prevent form submission (page reload)
+<form onSubmit={(e) => {
+  e.preventDefault(); // Stops form from refreshing page
+  handleLogin(data);
+}}>
+
+// ✅ Prevent link navigation
+<a href="/page" onClick={(e) => {
+  e.preventDefault(); // Link won't navigate
+  // Custom logic here
+}}>
+
+// ✅ Prevent checkbox toggle
+<input type="checkbox" onClick={(e) => {
+  e.preventDefault(); // Checkbox won't check/uncheck
+  // Custom validation logic
+}}>
+```
+_Visual Example:_
+```
+Without preventDefault():
+User clicks <form> submit → Browser refreshes page ❌
+
+With preventDefault():
+User clicks <form> submit → Custom handleSubmit() runs → No page refresh ✅
+```
+
+**2. stopPropagation()** - Stops Event Bubbling
+_What it does_: Prevents the event from traveling up the DOM tree to parent elements.
+
+Event Bubbling Flow:
+```
+Child → Parent → Grandparent → Document
+```
+Dropdown Example:
+```jsx
+<div onClick={handleCardClick}>  {/* Parent: navigate to blog */}
+  <DropdownMenuTrigger onClick={(e) => {
+    e.stopPropagation(); // ✅ Stops bubbling to parent div
+  }}>
+    <EllipsisVertical />
+  </DropdownMenuTrigger>
+</div>
+```
+_Visual Flow:_
+```
+WITHOUT stopPropagation():
+Click Dropdown → Dropdown opens → Event bubbles up → Card clicked → Navigate ❌
+
+WITH stopPropagation():
+Click Dropdown → Dropdown opens → Event STOPS → Card NOT clicked ✅
+```
+
 ---
 ## Note 6: Understanding Tailwind classes
 #### 1. `overflow-hidden` - Clips Content That Exceeds Boundaries
