@@ -1,10 +1,6 @@
 # CommitLog
 
-A full-stack blogging platform built with the MERN stack (MongoDB, Express.js, React, Node.js) as a learning project to understand modern web development practices.
-
-## 📋 Project Overview
-
-CommitLog is a feature-rich blogging application that allows users to create, read, and interact with blog posts. The project demonstrates implementation of authentication, authorization, file uploads, rich text editing, and real-time interactions.
+CommitLog is a feature-rich developer blogging application that allows users to create, read, and interact with blog posts. The project demonstrates implementation of authentication, authorization, file uploads, rich text editing, and real-time interactions.
 
 ## ✨ Features
 
@@ -30,7 +26,6 @@ CommitLog is a feature-rich blogging application that allows users to create, re
 
 #### User Experience
 - **Responsive Design**: Mobile-first design with Tailwind CSS
-- **Animations**: Smooth transitions using Framer Motion
 - **Toast Notifications**: Real-time feedback using React Toastify
 - **Loading States**: Skeleton loaders and spinners for better UX
 - **Error Handling**: Comprehensive error messages and fallback UI
@@ -55,7 +50,6 @@ The following features are planned for future implementation:
 - **React Router DOM** - Client-side routing
 - **TipTap** - Rich text editor
 - **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library
 - **React Hook Form** - Form validation and handling
 - **Axios** - HTTP client
 - **React Toastify** - Toast notifications
@@ -79,28 +73,28 @@ The following features are planned for future implementation:
 ```
 CommitLog/
 ├── backend/
-│   ├── config/
-│   │   └── passport.js           # OAuth strategies configuration
-│   ├── controllers/
-│   │   ├── blog.js               # Blog CRUD operations
-│   │   └── user.js               # User authentication logic
-│   ├── middlewares/
-│   │   ├── auth.js               # Authentication & authorization middleware
+│   ├── config/                   # Configuration files
+│   │   └── passport.js           
+│   ├── controllers/              # Route handlers
+│   │   ├── blog.js               
+│   │   └── user.js               
+│   ├── middlewares/             # Custom middlewares
+│   │   ├── auth.js              # Authentication & authorization middleware
 │   │   └── errorHandler.js      # Global error handling
-│   ├── models/
-│   │   ├── blog.js               # Blog schema with embedded comments/likes
-│   │   └── user.js               # User schema with OAuth support
-│   ├── routes/
+│   ├── models/                  # Mongoose schemas
+│   │   ├── blog.js               
+│   │   └── user.js               
+│   ├── routes/                   # Api routes
 │   │   ├── auth.js               # OAuth routes
-│   │   ├── blog.js               # Blog API routes
-│   │   └── user.js               # User API routes
-│   ├── services/
+│   │   ├── blog.js               
+│   │   └── user.js               
+│   ├── services/                 # Business logic
 │   │   ├── auth.js               # JWT token generation/verification
 │   │   ├── hash.js               # Password hashing utilities
 │   │   └── upload.js             # Multer configuration
 │   ├── uploads/
 │   │   └── blog-cover/           # Uploaded cover images
-│   ├── utils/
+│   ├── utils/                    # Helper functions
 │   │   └── errorFactory.js       # Custom error classes
 │   ├── .env                      # Environment variables
 │   ├── index.js                  # Server entry point
@@ -153,74 +147,67 @@ CommitLog/
 
 ### Prerequisites
 
-- **Node.js** (v14 or higher)
-- **MongoDB** (local installation or MongoDB Atlas account)
-- **npm** or **yarn** package manager
+- **Node.js**: v18 or higher
+- **MongoDB**: local installation or MongoDB Atlas.
+- **Google Cloud Console Project**: Required for Google OAuth setup
 
-### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/saayush615/CommitLog.git
-   cd CommitLog
-   ```
-
-2. **Setup Backend**
+### Backend Setup
+   1. Navigate to backend directory:
    ```bash
    cd backend
+   ```
+   2. Install dependencies:
+   ```bash
    npm install
    ```
 
-   Create a `.env` file in the `backend` directory:
-   ```env
+   3. Create a `.env` file in the `backend` directory:
+   ```bash
    PORT=3000
    JWT_SECRET=your_jwt_secret_key
    CommitLogDB=mongodb://localhost:27017/commitlog
+   FRONTEND_URL=http://localhost:5173
+
+   #Google oAuth Config
    GOOGLE_CLIENT_ID=your_google_client_id
    GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+   # Add GitHub OAuth
    GITHUB_CLIENT_ID=your_github_client_id
    GITHUB_CLIENT_SECRET=your_github_client_secret
-   FRONTEND_URL=http://localhost:5173
-   NODE_ENV=development
    ```
-
-3. **Setup Frontend**
+   4. Start the server:
    ```bash
-   cd ../frontend
-   npm install
-   ```
-
-   Create a `.env` file in the `frontend` directory:
-   ```env
-   VITE_API_URL=http://localhost:3000
-   ```
-
-### Running the Application
-
-1. **Start MongoDB** (if running locally)
-   ```bash
-   mongod
-   ```
-
-2. **Start Backend Server**
-   ```bash
-   cd backend
-   npm start
-   ```
-   Server runs on `http://localhost:3000`
-
-3. **Start Frontend Development Server**
-   ```bash
-   cd frontend
    npm run dev
    ```
-   Application runs on `http://localhost:5173`
+   Server will run on `http://localhost:3000`
 
-## 🔐 OAuth Setup
+### Frontend Setup
+
+   1. Navigate to frontend directory:
+   ```bash
+   cd frontend
+   ```
+   2. Install dependencies:
+   ```bash
+   npm install
+   ```
+   3. Create a `.env` file in the `frontend` directory:
+   ```bash
+   VITE_API_URL=http://localhost:3000
+   ```
+   4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+   App will run on `http://localhost:5173`
+
+### 🔐 OAuth Setup
 
 To enable Google and GitHub authentication:
 
-### Google OAuth
+#### Google OAuth
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing one
 3. Enable Google+ API
@@ -228,7 +215,7 @@ To enable Google and GitHub authentication:
 5. Add authorized redirect URI: `http://localhost:3000/auth/google/callback`
 6. Copy Client ID and Client Secret to `.env` file
 
-### GitHub OAuth
+#### GitHub OAuth
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
 2. Create a new OAuth App
 3. Set Authorization callback URL: `http://localhost:3000/auth/github/callback`
@@ -299,6 +286,7 @@ The application can be tested manually using:
 - Comment editing/deletion needs to be added
 - Profile picture upload pending
 - No pagination for large blog lists
+- Sidebar on mobile. Not working
 
 ## 🔮 Future Enhancements
 
@@ -338,17 +326,17 @@ This is a learning project, but suggestions and feedback are welcome! Feel free 
 - Suggest new features
 - Submit pull requests
 
-## 📄 License
+## 🙏 Credit & Acknowledgments
 
-This project is open source and available under the MIT License.
+### UI Design
+The visual design and user interface of this project are based on the excellent work of **[Somnath Das](https://www.figma.com/@somnathdas)**. Their design is publicly available and free to use.
 
-## 👤 Author
+- **Designer:** [Somnath Das](https://www.figma.com/@somnathdas)
+- **Original Design:** [nLog a Blogging website](https://www.figma.com/community/file/1118764549305878223/nlog-a-blogging-website)
 
-**Aayush**
-- GitHub: [@saayush615](https://github.com/saayush615)
+Special thanks for creating such a beautiful and functional design that made this learning project possible!
 
-## 🙏 Acknowledgments
-
+### Technologies
 - [React Documentation](https://react.dev/)
 - [Express.js Documentation](https://expressjs.com/)
 - [MongoDB Documentation](https://docs.mongodb.com/)
@@ -356,6 +344,10 @@ This project is open source and available under the MIT License.
 - [Shadcn UI](https://ui.shadcn.com/)
 - [TipTap Editor](https://tiptap.dev/)
 
----
+## 📄 License
 
-**Note**: This is a learning project and may not follow all production best practices. It's designed to demonstrate core MERN stack concepts and features.
+This project is intended solely for educational purposes.
+
+## Author
+
+Built with ❤️ as a full-stack learning project.
