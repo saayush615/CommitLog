@@ -81,7 +81,7 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
           cd deploy
-          zip -r ../deployment.zip
+          zip -r ../deployment.zip .
           cd ..
 
       # Upload artifact for deployment job
