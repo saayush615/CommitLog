@@ -1,0 +1,140 @@
+name: Deploy Backend to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+    paths: 
+      - 'backend/**'
+      - '.github/workflows/azure-nodejs-app.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: 'CommitLog'    # set this to your application's name
+  NODE_VERSION: '20.x'                # set this to the node version to use
+  WORKING_DIRECTORY: './backend'
+
+jobs:
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{env.WORKING_DIRECTORY}}/package-lock.json'
+
+      - name: Install dependency
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci
+
+      - name: Create a production environment file
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          cat > .env << EOF
+          NODE_ENV=production
+          PORT=${{ secrets.PORT }}
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+
+          # Database
+          CommitLogDB=${{ secrets.CommitLogDB }}
+
+          # JWT
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+
+          # Google oAuth
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+
+          # GitHub OAuth
+          GITHUB_CLIENT_ID=${{ secrets.GHUB_CLIENT_ID }}
+          GITHUB_CLIENT_SECRET=${{ secrets.GHUB_CLIENT_SECRET }}
+          EOF
+
+      # Prepare deployment package
+      - name: Production deployment package
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          # Create deployment directory
+          mkdir -p ../deploy
+
+          # copy neccessary files
+          cp -r . ../deploy/
+
+          # Remove the dev dependency and clean ups
+          cd ../deploy
+          rm -rf node_modules
+          npm ci --omit=dev
+
+          # Remove the unnecessary files
+          rm -rf .git .github tests coverage *.md
+
+      # Zip deployment package
+      - name: Create a deployment artifact
+        working-directory: ./deploy
+        run: |
+          zip -r ../deployment.zip
+
+      # Upload artifact for deployment job
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-app
+          path: deployment.zip
+          retention-days: 1  # Clean up after 1 day
+
+  deploy:
+    name: Deploy on azure
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-app
+
+      - name: Extract the deployment package
+        run: unzip deployment.zip
+
+      - name: Deploy to azure app services
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: .
+      
+      # 4. Verify deployment
+      - name: Verify deployment
+        run: |
+          echo " Deployment completed!"
+          echo "Application URL: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
+          
+          # Wait for app to start
+          sleep 10
+          
+          # Health check
+          curl -f ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health || echo "⚠️ Health check failed"
+
+  cleanup:
+    name: cleanup old deployment from runner
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: success()
+
+    steps:
+      - name: Delete deployment artifact from github runners
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: backend-app
