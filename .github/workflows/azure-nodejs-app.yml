@@ -78,9 +78,11 @@ jobs:
 
       # Zip deployment package
       - name: Create a deployment artifact
-        working-directory: ./deploy
+        working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
+          cd deploy
           zip -r ../deployment.zip
+          cd ..
 
       # Upload artifact for deployment job
       - name: Upload deployment artifact
