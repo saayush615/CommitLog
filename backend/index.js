@@ -27,7 +27,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Your frontend URL
+    origin:  ['http://localhost:5173', 'https://commitlog-bdb5c9e5gscpbfab.centralindia-01.azurewebsites.net'], // Your frontend URL
     credentials: true    // Allow cookies to be sent/received
 }))
 
@@ -52,15 +52,15 @@ async function connectDB(){
     console.log('✅ Connected to DB');
 };
 connectDB().catch((err) => { 
-    next(err);
+    console.error('Database connection failed:', err.message);
     process.exit(1);
 });
 
 app.get('/',(req,res) => { 
-    console.log(process.env.FRONTEND_URL);
     return res.status(200).json({
         success: true,
-        message: 'Welcome to blog backend'
+        message: 'Welcome to blog backend',
+        checkurl: process.env.FRONTEND_URL
     })
  })
 
