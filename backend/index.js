@@ -57,6 +57,7 @@ connectDB().catch((err) => {
 });
 
 app.get('/',(req,res) => { 
+    console.log(process.env.FRONTEND_URL);
     return res.status(200).json({
         success: true,
         message: 'Welcome to blog backend'
