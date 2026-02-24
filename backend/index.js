@@ -27,7 +27,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
 app.use(cors({
-    origin:  ['http://localhost:5173', 'https://commitlog-bdb5c9e5gscpbfab.centralindia-01.azurewebsites.net'], // Your frontend URL
+    origin:  ['http://localhost:5173', process.env.FRONTEND_URL], // Your frontend URL
     credentials: true    // Allow cookies to be sent/received
 }))
 
@@ -59,8 +59,7 @@ connectDB().catch((err) => {
 app.get('/',(req,res) => { 
     return res.status(200).json({
         success: true,
-        message: 'Welcome to blog backend',
-        checkurl: process.env.FRONTEND_URL
+        message: 'Welcome to blog backend'
     })
  })
 
