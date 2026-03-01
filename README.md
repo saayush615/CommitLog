@@ -2,6 +2,8 @@
 
 CommitLog is a feature-rich developer blogging application that allows users to create, read, and interact with blog posts. The project demonstrates implementation of authentication, authorization, file uploads, rich text editing, and real-time interactions.
 
+**YouTube Demo:** [Watch the demo](https://www.youtube.com/watch?v=JQ4uQZytA3A)
+
 ## ✨ Features
 
 ### Implemented Features
