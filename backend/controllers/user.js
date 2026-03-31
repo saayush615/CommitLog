@@ -76,7 +76,7 @@ async function handleLogin(req,res, next){
         res.cookie("uid", token, {
             httpOnly: true,        // Prevent XSS attacks
             secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',    // CSRF protection
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',    // Allow cross origin
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
 
